@@ -1,7 +1,7 @@
-import type { Catalog, ContestFilters, ContestOptions, ContestPapers, ContestResults, Dashboard, EducationFilters, EducationOptions, EstablishmentResults, FilterOptions, Filters, JobDetail } from './types';
+import type { Catalog, ContestFilters, ContestOptions, ContestPapers, ContestResults, Dashboard, EducationFilters, EducationOptions, EstablishmentResults, FilterOptions, Filters, JobDetail, OrientationAnswer, OrientationRecommendations, OrientationSession } from './types';
 
-async function request<T>(path: string): Promise<T> {
-  const response = await fetch(path);
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(path, options);
   if (!response.ok) throw new Error('La connexion au service LogPose a échoué.');
   return response.json() as Promise<T>;
 }
@@ -53,4 +53,20 @@ export function getContests(filters: ContestFilters) {
 
 export function getContestPapers(id: string) {
   return request<ContestPapers>(`/api/concours/${encodeURIComponent(id)}/annales`);
+}
+
+export function createOrientationSession() {
+  return request<OrientationSession>('/api/orientation/sessions', { method: 'POST' });
+}
+
+export function submitOrientationAnswer(sessionId: string, questionId: string, answer: string) {
+  return request<OrientationAnswer>(`/api/orientation/sessions/${encodeURIComponent(sessionId)}/answers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questionId, answer })
+  });
+}
+
+export function getOrientationRecommendations(sessionId: string) {
+  return request<OrientationRecommendations>(`/api/orientation/sessions/${encodeURIComponent(sessionId)}/recommandations`);
 }

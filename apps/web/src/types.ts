@@ -141,3 +141,61 @@ export type ContestPapers = {
   contest: Contest;
   papers: Paper[];
 };
+
+export type OrientationOption = {
+  value: string;
+  label: string;
+  description: string;
+};
+
+export type OrientationQuestion = {
+  id: 'series' | 'interest' | 'activity' | 'location' | 'duration';
+  step: number;
+  total: number;
+  eyebrow: string;
+  prompt: string;
+  helper: string;
+  options: OrientationOption[];
+};
+
+export type OrientationSession = {
+  sessionId: string;
+  question: OrientationQuestion;
+};
+
+export type OrientationAnswer = {
+  status: number;
+  sessionId: string;
+  completed: boolean;
+  question: OrientationQuestion | null;
+  profile?: OrientationProfileItem[];
+};
+
+export type OrientationProfileItem = {
+  label: string;
+  value: string;
+};
+
+export type OrientationRecommendation = {
+  rank: number;
+  jobId: string;
+  job: string;
+  category: string;
+  score: number;
+  reason: string;
+  pathway: {
+    establishment: string;
+    city: string;
+    field: string;
+    program: string;
+    duration: string;
+    series: string[];
+    jobs: string[];
+  } | null;
+};
+
+export type OrientationRecommendations = {
+  metadata: DemoMetadata;
+  profile: OrientationProfileItem[];
+  recommendations: OrientationRecommendation[];
+};

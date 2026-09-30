@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
-import { getCatalog, getContestOptions, getContestPapers, getContests, getDashboard, getEducationOptions, getEstablishments, getFilterOptions, getJob } from './api';
-import type { Catalog, ContestFilters, ContestOptions, ContestPapers, ContestResults, Dashboard, EducationFilters, EducationOptions, EstablishmentResults, FilterOptions, Filters, JobCategory, JobDetail, JobSummary } from './types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createOrientationSession, getCatalog, getContestOptions, getContestPapers, getContests, getDashboard, getEducationOptions, getEstablishments, getFilterOptions, getJob, getOrientationRecommendations, submitOrientationAnswer } from './api';
+import type { Catalog, ContestFilters, ContestOptions, ContestPapers, ContestResults, Dashboard, EducationFilters, EducationOptions, EstablishmentResults, FilterOptions, Filters, JobCategory, JobDetail, JobSummary, OrientationQuestion, OrientationRecommendations } from './types';
 
 const EMPTY_FILTERS: Filters = { zones: [], sectors: [], companies: [], employmentTypes: [] };
 const SECTOR_COLORS = ['#cb9345', '#c15c42', '#89b6a8', '#6f9889', '#d5c08f', '#8c8d74'];
 const formatter = new Intl.NumberFormat('fr-FR');
 
-type View = 'dashboard' | 'catalogue' | 'job' | 'establishments' | 'contests' | 'contest';
+type View = 'dashboard' | 'catalogue' | 'job' | 'orientation' | 'establishments' | 'contests' | 'contest';
 type IconName = 'grid' | 'compass' | 'school' | 'file' | 'sliders' | 'arrow-up' | 'briefcase' | 'chevron' | 'close' | 'refresh' | 'sparkle' | 'info' | 'search' | 'arrow-left' | 'layers' | 'target';
 
 function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
@@ -266,6 +266,71 @@ function ContestDetailPage({ contestId, onBack, onNotice }: { contestId: string 
   </section>;
 }
 
+function OrientationPage({ onOpenJob }: { onOpenJob: (id: string) => void }) {
+  const started = useRef(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [question, setQuestion] = useState<OrientationQuestion | null>(null);
+  const [history, setHistory] = useState<Array<{ question: string; answer: string }>>([]);
+  const [recommendations, setRecommendations] = useState<OrientationRecommendations | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const startSession = () => {
+    setLoading(true); setError(null); setSessionId(null); setQuestion(null); setHistory([]); setRecommendations(null);
+    createOrientationSession().then((result) => { setSessionId(result.sessionId); setQuestion(result.question); }).catch((requestError: Error) => setError(requestError.message)).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!started.current) { started.current = true; startSession(); }
+  }, []);
+
+  const answerQuestion = (value: string) => {
+    if (!sessionId || !question || submitting) return;
+    const selected = question.options.find((option) => option.value === value);
+    if (!selected) return;
+    setSubmitting(true); setError(null);
+    submitOrientationAnswer(sessionId, question.id, value).then((result) => {
+      setHistory((current) => [...current, { question: question.prompt, answer: selected.label }]);
+      if (result.completed) {
+        setQuestion(null);
+        return getOrientationRecommendations(sessionId).then(setRecommendations);
+      }
+      setQuestion(result.question);
+      return undefined;
+    }).catch((requestError: Error) => setError(requestError.message)).finally(() => setSubmitting(false));
+  };
+
+  const restart = () => { started.current = true; startSession(); };
+  if (loading) return <LoadingState label="Préparation de votre parcours d’orientation…" />;
+  if (error && !question && !recommendations) return <section className="error-card orientation-error"><Icon name="info" /><div><strong>Impossible de démarrer l’orientation.</strong><span>{error}</span></div><button onClick={restart}><Icon name="refresh" size={17} /> Réessayer</button></section>;
+
+  if (recommendations) return <OrientationResults data={recommendations} history={history} onRestart={restart} onOpenJob={onOpenJob} />;
+  if (!question) return <LoadingState label="Analyse de vos réponses…" />;
+
+  return <section className="orientation-page">
+    <header className="orientation-hero"><div><p className="eyebrow">Orientation guidée · moteur de règles</p><h1>Commençons par<br /><em>vous écouter.</em></h1><p>Chaque question s’adapte à vos réponses précédentes pour affiner les pistes proposées.</p></div><div className="orientation-orbit"><Icon name="compass" size={45} /><i /><b /></div></header>
+    <section className="orientation-card">
+      <div className="orientation-card__head"><div><span className="eyebrow">{question.eyebrow}</span><span className="question-count">Question {question.step} / {question.total}</span></div><button className="orientation-restart" onClick={restart}><Icon name="refresh" size={15} /> Recommencer</button></div>
+      <div className="progress-track"><i style={{ width: `${((question.step - 1) / question.total) * 100}%` }} /></div>
+      <div className="question-content"><h2>{question.prompt}</h2><p>{question.helper}</p><div className="answer-list">{question.options.map((option, index) => <button className="answer-card" key={option.value} disabled={submitting} onClick={() => answerQuestion(option.value)}><span className="answer-card__index">0{index + 1}</span><span className="answer-card__copy"><strong>{option.label}</strong><small>{option.description}</small></span><Icon name="chevron" size={19} /></button>)}</div></div>
+      {error && <div className="orientation-inline-error"><Icon name="info" size={16} />{error}</div>}
+    </section>
+    {history.length > 0 && <section className="answer-history"><p className="eyebrow">Vos réponses</p><div>{history.map((item) => <span key={item.question}><small>{item.question}</small><b>{item.answer}</b></span>)}</div></section>}
+    <footer className="data-footer orientation-footer"><Icon name="info" size={16} /><span><strong>Vos choix restent sur la session de démonstration.</strong> Aucun nom, numéro ou résultat scolaire n’est demandé dans ce parcours.</span></footer>
+  </section>;
+}
+
+function OrientationResults({ data, history, onRestart, onOpenJob }: { data: OrientationRecommendations; history: Array<{ question: string; answer: string }>; onRestart: () => void; onOpenJob: (id: string) => void }) {
+  return <section className="orientation-page orientation-results-page">
+    <header className="orientation-results-hero"><div><span className="result-check">✓</span><p className="eyebrow">Parcours complété</p><h1>Voici vos premières<br /><em>pistes.</em></h1><p>Ces recommandations expliquent le lien entre vos réponses et les parcours disponibles dans le référentiel de démonstration.</p></div><button className="outline-button" onClick={onRestart}><Icon name="refresh" size={15} /> Refaire le parcours</button></header>
+    <section className="profile-summary"><div className="profile-summary__head"><Icon name="target" size={19} /><div><p className="eyebrow">Votre profil résumé</p><strong>5 critères pris en compte</strong></div></div><div className="profile-summary__items">{data.profile.map((item) => <span key={item.label}><small>{item.label}</small><b>{item.value}</b></span>)}</div></section>
+    <section className="recommendations-section"><div className="recommendations-section__head"><div><p className="eyebrow">Pistes prioritaires</p><h2>Des métiers et parcours à explorer</h2></div><span>Indice indicatif</span></div><div className="recommendation-list">{data.recommendations.map((recommendation) => <article className="recommendation-card" key={recommendation.jobId}><div className="recommendation-rank">0{recommendation.rank}</div><div className="recommendation-main"><div className="recommendation-main__title"><span>{recommendation.category}</span><h3>{recommendation.job}</h3></div><p>{recommendation.reason}</p>{recommendation.pathway ? <div className="pathway-box"><Icon name="school" size={17} /><div><small>Parcours à explorer au Congo</small><strong>{recommendation.pathway.program} · {recommendation.pathway.establishment}</strong><span>{recommendation.pathway.city} · {recommendation.pathway.duration}</span></div></div> : <div className="pathway-box pathway-box--empty"><Icon name="info" size={17} /><span>Parcours à compléter dans le référentiel.</span></div>}</div><div className="recommendation-score"><strong>{recommendation.score}<small>%</small></strong><span>compatibilité</span><button className="outline-button" onClick={() => onOpenJob(recommendation.jobId)}>Voir le métier <Icon name="chevron" size={15} /></button></div></article>)}</div></section>
+    <section className="orientation-notice"><Icon name="info" size={19} /><p><strong>Comment lire ce résultat ?</strong> Le pourcentage est un indice de compatibilité issu de règles simples et visibles : série, univers d’intérêt, activité préférée, zone et durée de formation. Il ne constitue ni une admission ni une garantie d’emploi.</p></section>
+    {history.length > 0 && <details className="history-details"><summary>Voir les réponses prises en compte</summary><div>{history.map((item) => <span key={item.question}><small>{item.question}</small><b>{item.answer}</b></span>)}</div></details>}
+  </section>;
+}
+
 export function App() {
   const [view, setView] = useState<View>('dashboard');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
@@ -306,14 +371,14 @@ export function App() {
   const showOfferNotice = () => setNotice('Les offres liées arriveront avec l’intégration des sources partenaires.');
   const openContest = (id: string) => { setSelectedContestId(id); navigate('contest'); };
 
-  const title = view === 'dashboard' ? "Marché de l'emploi" : view === 'catalogue' ? 'Catalogue des métiers' : view === 'job' ? 'Fiche métier' : view === 'establishments' ? 'Établissements' : view === 'contests' ? 'Concours et annales' : 'Détail du concours';
+  const title = view === 'dashboard' ? "Marché de l'emploi" : view === 'catalogue' ? 'Catalogue des métiers' : view === 'job' ? 'Fiche métier' : view === 'orientation' ? 'Orientation guidée' : view === 'establishments' ? 'Établissements' : view === 'contests' ? 'Concours et annales' : 'Détail du concours';
   return <div className="app-shell">
     <aside className="sidebar">
       <button className="brand brand-button" onClick={() => navigate('dashboard')} aria-label="LogPose, accueil"><span className="brand-mark"><span /></span><span>log<span>pose</span></span></button>
       <nav className="side-nav" aria-label="Navigation principale">
         <button className={`side-nav__item ${view === 'dashboard' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('dashboard')}><Icon name="grid" /> <span>Marché de l'emploi</span></button>
         <button className={`side-nav__item ${view === 'catalogue' || view === 'job' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('catalogue')}><Icon name="layers" /> <span>Catalogue métiers</span></button>
-        <span className="side-nav__item side-nav__item--soon"><Icon name="compass" /> <span>Orientation</span><em>Bientôt</em></span>
+        <button className={`side-nav__item ${view === 'orientation' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('orientation')}><Icon name="compass" /> <span>Orientation</span></button>
         <button className={`side-nav__item ${view === 'establishments' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('establishments')}><Icon name="school" /> <span>Établissements</span></button>
         <button className={`side-nav__item ${view === 'contests' || view === 'contest' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('contests')}><Icon name="file" /> <span>Annales</span></button>
       </nav>
@@ -324,6 +389,7 @@ export function App() {
       {view === 'dashboard' && <DashboardPage dashboard={dashboard} isLoading={dashboardLoading} error={dashboardError} filters={filters} options={options} limit={limit} onSetLimit={setLimit} onOpenFilters={() => setFilterOpen(true)} onClearFilters={() => setFilters(EMPTY_FILTERS)} onRetry={loadDashboard} onOpenJob={openJob} />}
       {view === 'catalogue' && <CataloguePage catalog={catalog} loading={catalogLoading} error={catalogError} onRetry={loadCatalog} onOpenJob={openJob} />}
       {view === 'job' && <JobPage job={selectedJob} loading={jobLoading} error={jobError} onBack={() => navigate('catalogue')} onOpenOffers={showOfferNotice} />}
+      {view === 'orientation' && <OrientationPage onOpenJob={openJob} />}
       {view === 'establishments' && <EstablishmentsPage onNotice={setNotice} />}
       {view === 'contests' && <ContestsPage onOpenContest={openContest} />}
       {view === 'contest' && <ContestDetailPage contestId={selectedContestId} onBack={() => navigate('contests')} onNotice={setNotice} />}
@@ -331,6 +397,7 @@ export function App() {
     <nav className="bottom-nav" aria-label="Navigation mobile">
       <button className={`bottom-nav__item ${view === 'dashboard' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('dashboard')}><Icon name="grid" /><span>Marché</span></button>
       <button className={`bottom-nav__item ${view === 'catalogue' || view === 'job' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('catalogue')}><Icon name="layers" /><span>Métiers</span></button>
+      <button className={`bottom-nav__item ${view === 'orientation' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('orientation')}><Icon name="compass" /><span>Orienter</span></button>
       <button className={`bottom-nav__item ${view === 'establishments' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('establishments')}><Icon name="school" /><span>Écoles</span></button>
       <button className={`bottom-nav__item ${view === 'contests' || view === 'contest' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('contests')}><Icon name="file" /><span>Annales</span></button>
     </nav>

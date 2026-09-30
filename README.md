@@ -2,20 +2,20 @@
 
 MVP de l'application d'orientation scolaire et professionnelle pour la République du Congo.
 
-## Première livraison
+## MVP livré — lots 1 à 4
 
-Les deux premières itérations couvrent les **lots 1 et 2** du cahier des charges :
+Les quatre premières itérations couvrent le socle fonctionnel du cahier des charges :
 
-- tableau de bord du marché de l'emploi ;
-- filtres par zone, secteur, entreprise et type d'emploi ;
+- tableau de bord du marché de l'emploi et filtres par zone, secteur, entreprise et type d'emploi ;
 - catalogue de métiers avec recherche, catégories et fiches détaillées ;
 - formations, compétences et organisations associées à chaque métier ;
 - recherche d'établissements par série, filière et métier visé ;
 - concours filtrables et références d'annales avec garde-fous sur les droits de diffusion ;
+- orientation guidée par cinq questions dépendantes et recommandations explicables ;
 - API REST locale avec données de démonstration clairement identifiées ;
 - interface responsive pensée d'abord pour les usages mobiles.
 
-> Les indicateurs actuellement affichés sont des données fictives de démonstration. Ils ne constituent pas des statistiques officielles sur l'emploi au Congo.
+> Tous les indicateurs, référentiels, établissements, concours et recommandations actuellement affichés sont des données de démonstration. Ils ne constituent ni des statistiques officielles, ni une garantie d’admission ou d’emploi.
 
 ## Pré-requis
 
@@ -52,6 +52,7 @@ Le navigateur appelle uniquement des URL relatives sous `/api`. En développemen
 1. Valider les sources de données, leur date de mise à jour et leur méthode de calcul.
 2. Remplacer les référentiels de démonstration par des données contrôlées avec les partenaires.
 3. Ajouter les fiches établissement, conditions d’admission et fichiers d’annales autorisés.
-4. Mettre en place l'orientation guidée à partir de règles de compatibilité explicites, avant toute couche conversationnelle IA.
+4. Définir le consentement, la conservation et la suppression des futures sessions d’orientation authentifiées.
+5. Évaluer une couche conversationnelle IA comme aide à la reformulation, sans remplacer les règles de compatibilité explicites.
 
 Les documents initiaux du projet sont conservés à la racine du dépôt.

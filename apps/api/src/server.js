@@ -324,6 +324,77 @@ const contests = [
   }
 ];
 
+const orientationSessions = new Map();
+let orientationSessionSequence = 1;
+
+const orientationInterests = {
+  numerique: {
+    label: 'Technologies et données',
+    description: 'Créer des outils, analyser des informations ou piloter des produits numériques.',
+    jobs: ['developpeur-fullstack', 'data-analyst', 'product-manager'],
+    activities: [
+      { value: 'build', label: 'Construire des applications', description: 'Donner vie à des outils numériques.' },
+      { value: 'analyse', label: 'Comprendre les données', description: 'Faire parler les chiffres pour aider à décider.' },
+      { value: 'organise', label: 'Coordonner un produit', description: 'Relier les besoins des utilisateurs et une équipe.' }
+    ],
+    activityJobs: { build: 'developpeur-fullstack', analyse: 'data-analyst', organise: 'product-manager' }
+  },
+  sante: {
+    label: 'Santé et sciences du vivant',
+    description: 'Prendre soin, observer et appliquer des protocoles précis.',
+    jobs: ['infirmier-de', 'laborantin', 'aide-soignant'],
+    activities: [
+      { value: 'soin', label: 'Accompagner et soigner', description: 'Être au contact des patients au quotidien.' },
+      { value: 'analyse', label: 'Observer et analyser', description: 'Travailler avec des prélèvements et protocoles.' },
+      { value: 'soutien', label: 'Apporter un soutien concret', description: 'Contribuer au confort et au bien-être des personnes.' }
+    ],
+    activityJobs: { soin: 'infirmier-de', analyse: 'laborantin', soutien: 'aide-soignant' }
+  },
+  btp: {
+    label: 'Bâtiment et industrie',
+    description: 'Construire, maintenir et coordonner des réalisations sur le terrain.',
+    jobs: ['chef-de-chantier', 'technicien-electricien', 'conducteur-de-travaux', 'mecanicien-industriel'],
+    activities: [
+      { value: 'terrain', label: 'Organiser un chantier', description: 'Coordonner les équipes et suivre l’avancement.' },
+      { value: 'technique', label: 'Intervenir sur des équipements', description: 'Installer, entretenir et diagnostiquer.' },
+      { value: 'planifier', label: 'Planifier des ouvrages', description: 'Préparer les moyens, délais et ressources.' }
+    ],
+    activityJobs: { terrain: 'chef-de-chantier', technique: 'technicien-electricien', planifier: 'conducteur-de-travaux' }
+  },
+  environnement: {
+    label: 'Environnement et agriculture',
+    description: 'Préserver les ressources et agir avec les communautés sur le terrain.',
+    jobs: ['technicien-environnement', 'animateur-agricole'],
+    activities: [
+      { value: 'mesurer', label: 'Observer les milieux', description: 'Collecter et suivre des données environnementales.' },
+      { value: 'transmettre', label: 'Transmettre sur le terrain', description: 'Partager des pratiques utiles avec les communautés.' }
+    ],
+    activityJobs: { mesurer: 'technicien-environnement', transmettre: 'animateur-agricole' }
+  },
+  gestion: {
+    label: 'Gestion, commerce et services',
+    description: 'Conseiller, organiser des flux ou suivre l’activité financière.',
+    jobs: ['conseiller-clientele', 'assistant-comptable', 'responsable-logistique'],
+    activities: [
+      { value: 'conseil', label: 'Conseiller des clients', description: 'Écouter les besoins et proposer des solutions.' },
+      { value: 'chiffres', label: 'Travailler avec les chiffres', description: 'Suivre des opérations et structurer l’information.' },
+      { value: 'flux', label: 'Organiser les flux', description: 'Faire circuler produits, stocks et informations.' }
+    ],
+    activityJobs: { conseil: 'conseiller-clientele', chiffres: 'assistant-comptable', flux: 'responsable-logistique' }
+  },
+  communication: {
+    label: 'Communication et développement commercial',
+    description: 'Faire connaître une offre, créer des contenus ou développer des relations clients.',
+    jobs: ['digital-marketer', 'agent-commercial', 'product-manager'],
+    activities: [
+      { value: 'contenu', label: 'Créer et faire connaître', description: 'Imaginer des messages et suivre leur impact.' },
+      { value: 'vente', label: 'Échanger et convaincre', description: 'Comprendre les besoins pour développer une activité.' },
+      { value: 'projet', label: 'Faire avancer un projet', description: 'Organiser les besoins et les priorités.' }
+    ],
+    activityJobs: { contenu: 'digital-marketer', vente: 'agent-commercial', projet: 'product-manager' }
+  }
+};
+
 const unique = (values) => [...new Set(values)].sort((a, b) => a.localeCompare(b, 'fr'));
 const parseList = (value) => (value ? value.split(',').filter(Boolean) : []);
 const inFilter = (value, selected) => selected.length === 0 || selected.includes(value);
@@ -450,6 +521,177 @@ function getContestPapers(id) {
   };
 }
 
+function optionsForInterestKeys(keys) {
+  return keys.map((key) => ({ value: key, label: orientationInterests[key].label, description: orientationInterests[key].description }));
+}
+
+function getOrientationQuestion(session) {
+  const answers = session.answers;
+  if (!answers.series) {
+    return {
+      id: 'series', step: 1, total: 5,
+      eyebrow: 'Votre parcours scolaire',
+      prompt: 'Quelle série de baccalauréat préparez-vous ou avez-vous obtenue ?',
+      helper: 'Cette réponse permet d’afficher des pistes adaptées, sans fermer les autres possibilités.',
+      options: [
+        { value: 'Série C', label: 'Série C', description: 'Mathématiques et sciences physiques.' },
+        { value: 'Série D', label: 'Série D', description: 'Sciences de la vie et de la terre.' },
+        { value: 'Série A', label: 'Série A', description: 'Lettres, langues et sciences humaines.' },
+        { value: 'Série G2', label: 'Série G2', description: 'Comptabilité et gestion.' }
+      ]
+    };
+  }
+  if (!answers.interest) {
+    const keys = ['Série C', 'Série D'].includes(answers.series)
+      ? ['numerique', 'sante', 'btp', 'environnement', 'gestion']
+      : answers.series === 'Série G2'
+        ? ['gestion', 'communication', 'numerique', 'environnement']
+        : ['communication', 'gestion', 'numerique', 'environnement', 'sante'];
+    return {
+      id: 'interest', step: 2, total: 5,
+      eyebrow: `Après ${answers.series}`,
+      prompt: 'Quel univers vous attire le plus aujourd’hui ?',
+      helper: 'Choisissez celui qui correspond le mieux à votre curiosité, même si vous hésitez encore.',
+      options: optionsForInterestKeys(keys)
+    };
+  }
+  if (!answers.activity) {
+    const interest = orientationInterests[answers.interest];
+    return {
+      id: 'activity', step: 3, total: 5,
+      eyebrow: interest.label,
+      prompt: 'Dans cet univers, qu’aimeriez-vous faire le plus souvent ?',
+      helper: 'Votre choix affinera les métiers proposés, à l’intérieur de l’univers sélectionné.',
+      options: interest.activities
+    };
+  }
+  if (!answers.location) {
+    return {
+      id: 'location', step: 4, total: 5,
+      eyebrow: 'Vos contraintes',
+      prompt: 'Où souhaitez-vous envisager votre formation en priorité ?',
+      helper: 'Nous privilégierons les parcours référencés dans la zone choisie, sans exclure les autres options.',
+      options: [
+        { value: 'Brazzaville', label: 'Brazzaville', description: 'Prioriser les parcours référencés dans la capitale.' },
+        { value: 'Pointe-Noire', label: 'Pointe-Noire', description: 'Prioriser les parcours référencés à Pointe-Noire.' },
+        { value: 'Toutes les villes', label: 'Je reste ouvert(e)', description: 'Explorer les parcours disponibles dans plusieurs villes.' }
+      ]
+    };
+  }
+  if (!answers.duration) {
+    return {
+      id: 'duration', step: 5, total: 5,
+      eyebrow: 'Votre projet de formation',
+      prompt: 'Quel type de parcours vous convient le mieux pour commencer ?',
+      helper: 'Ce choix sert à prioriser les pistes ; il ne remplace pas les conditions d’admission des établissements.',
+      options: [
+        { value: 'court', label: 'Parcours court', description: 'Privilégier une formation professionnalisante autour de 2 ans.' },
+        { value: 'long', label: 'Parcours diplômant', description: 'Privilégier une licence ou un parcours autour de 3 ans.' },
+        { value: 'ouvert', label: 'Je compare les deux', description: 'Recevoir des pistes sans préférence de durée.' }
+      ]
+    };
+  }
+  return null;
+}
+
+function orientationProfile(answers) {
+  const labels = {
+    series: 'Série du baccalauréat',
+    interest: 'Univers d’intérêt',
+    activity: 'Préférence d’activité',
+    location: 'Zone de formation',
+    duration: 'Type de parcours'
+  };
+  const question = { answers };
+  return Object.keys(labels).map((key) => {
+    const current = getOrientationQuestion({ answers: Object.fromEntries(Object.entries(answers).filter(([answerKey]) => answerKey !== key)) });
+    const option = current?.options.find((item) => item.value === answers[key]);
+    return { label: labels[key], value: option?.label || answers[key] };
+  });
+}
+
+function getProgramForJob(jobName, answers) {
+  const programs = establishments.flatMap((establishment) => establishment.programs.map((program) => ({
+    establishment: establishment.name,
+    city: establishment.city,
+    field: program.field,
+    program: program.name,
+    duration: program.duration,
+    series: program.series,
+    jobs: program.jobs
+  }))).filter((program) => program.jobs.includes(jobName));
+  const preferred = programs.sort((a, b) => {
+    const score = (program) => {
+      let value = 0;
+      if (answers.location !== 'Toutes les villes' && program.city === answers.location) value += 4;
+      if (answers.duration === 'court' && program.duration.startsWith('2')) value += 2;
+      if (answers.duration === 'long' && program.duration.startsWith('3')) value += 2;
+      if (program.series.includes(answers.series)) value += 1;
+      return value;
+    };
+    return score(b) - score(a);
+  })[0];
+  return preferred || null;
+}
+
+function getOrientationRecommendations(session) {
+  const answers = session.answers;
+  const interest = orientationInterests[answers.interest];
+  const primaryJob = interest.activityJobs[answers.activity];
+  const candidates = [primaryJob, ...interest.jobs.filter((id) => id !== primaryJob)].slice(0, 3);
+  return candidates.map((id, index) => {
+    const job = jobs.find((item) => item.id === id);
+    const category = categories.find((item) => item.id === job.categoryId);
+    const pathway = getProgramForJob(job.name, answers);
+    let score = 91 - index * 8;
+    if (pathway && answers.location !== 'Toutes les villes' && pathway.city === answers.location) score += 3;
+    if (pathway && answers.duration === 'court' && pathway.duration.startsWith('2')) score += 2;
+    if (pathway && answers.duration === 'long' && pathway.duration.startsWith('3')) score += 2;
+    return {
+      rank: index + 1,
+      jobId: job.id,
+      job: job.name,
+      category: category?.name || 'Métier',
+      score: Math.min(score, 98),
+      reason: index === 0 ? 'Votre préférence d’activité correspond directement à cette piste.' : `Cette piste reste cohérente avec votre intérêt pour ${interest.label.toLocaleLowerCase('fr')}.`,
+      pathway
+    };
+  });
+}
+
+function createOrientationSession() {
+  const session = { id: `orientation-${orientationSessionSequence++}`, answers: {}, createdAt: new Date().toISOString() };
+  orientationSessions.set(session.id, session);
+  return { sessionId: session.id, question: getOrientationQuestion(session) };
+}
+
+function submitOrientationAnswer(sessionId, payload) {
+  const session = orientationSessions.get(sessionId);
+  if (!session) return { error: 'Session d’orientation introuvable.', status: 404 };
+  const question = getOrientationQuestion(session);
+  if (!question) return { error: 'Cette session est déjà terminée.', status: 409 };
+  if (!payload || payload.questionId !== question.id || !question.options.some((option) => option.value === payload.answer)) {
+    return { error: 'La réponse ne correspond pas à la question en cours.', status: 400 };
+  }
+  session.answers[question.id] = payload.answer;
+  const nextQuestion = getOrientationQuestion(session);
+  return { status: 200, sessionId, completed: !nextQuestion, question: nextQuestion, profile: nextQuestion ? undefined : orientationProfile(session.answers) };
+}
+
+function readJson(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 12_000) reject(new Error('Corps de requête trop volumineux.'));
+    });
+    req.on('end', () => {
+      try { resolve(body ? JSON.parse(body) : {}); } catch { reject(new Error('JSON invalide.')); }
+    });
+    req.on('error', reject);
+  });
+}
+
 function getDashboard(searchParams) {
   const zones = parseList(searchParams.get('zones'));
   const sectors = parseList(searchParams.get('sectors'));
@@ -500,11 +742,11 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 
-function requestHandler(req, res) {
+async function requestHandler(req, res) {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
     return res.end();
@@ -527,6 +769,32 @@ function requestHandler(req, res) {
 
   if (req.method === 'GET' && url.pathname === '/api/dashboard') {
     return sendJson(res, 200, getDashboard(url.searchParams));
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/orientation/sessions') {
+    return sendJson(res, 201, createOrientationSession());
+  }
+
+  const orientationAnswerMatch = url.pathname.match(/^\/api\/orientation\/sessions\/([^/]+)\/answers$/);
+  if (req.method === 'POST' && orientationAnswerMatch) {
+    try {
+      const result = submitOrientationAnswer(decodeURIComponent(orientationAnswerMatch[1]), await readJson(req));
+      return sendJson(res, result.status, result.error ? { error: result.error } : result);
+    } catch (error) {
+      return sendJson(res, 400, { error: error.message || 'Requête invalide.' });
+    }
+  }
+
+  const orientationRecommendationMatch = url.pathname.match(/^\/api\/orientation\/sessions\/([^/]+)\/recommandations$/);
+  if (req.method === 'GET' && orientationRecommendationMatch) {
+    const session = orientationSessions.get(decodeURIComponent(orientationRecommendationMatch[1]));
+    if (!session) return sendJson(res, 404, { error: 'Session d’orientation introuvable.' });
+    if (getOrientationQuestion(session)) return sendJson(res, 409, { error: 'Le questionnaire doit être terminé avant de générer les recommandations.' });
+    return sendJson(res, 200, {
+      metadata: { dataStatus: 'demonstration', source: 'Moteur de règles LogPose — recommandations indicatives.' },
+      profile: orientationProfile(session.answers),
+      recommendations: getOrientationRecommendations(session)
+    });
   }
 
   if (req.method === 'GET' && url.pathname === '/api/metiers') {

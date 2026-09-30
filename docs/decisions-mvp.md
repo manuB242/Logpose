@@ -41,3 +41,13 @@ Les établissements retournent des **parcours de formation**, et non des informa
 - `GET /api/annales/:id/telechargement` : retourne volontairement un statut d’indisponibilité tant que le fichier et son droit de diffusion ne sont pas validés.
 
 Aucun PDF d’annale n’est servi dans ce MVP. Cette décision évite de présenter comme téléchargeables des contenus dont LogPose n’a pas encore vérifié la provenance, l’intégrité et l’autorisation de diffusion.
+
+## Lot 4 — orientation par questions dépendantes
+
+L’orientation démarre par une suite de cinq questions structurées. La deuxième question dépend de la série du baccalauréat ; la troisième dépend de l’univers d’intérêt choisi. Les deux dernières questions priorisent ensuite la zone et la durée de formation. Le moteur utilise des règles déterministes et les affiche dans le résultat : il ne s’agit pas d’un diagnostic ni d’une décision automatisée opaque.
+
+- `POST /api/orientation/sessions` : démarre une session de démonstration et retourne la première question ;
+- `POST /api/orientation/sessions/:id/answers` : valide une réponse et retourne la question dépendante suivante ;
+- `GET /api/orientation/sessions/:id/recommandations` : retourne le profil résumé et les trois pistes priorisées après la dernière réponse.
+
+Les sessions sont actuellement conservées uniquement en mémoire pour la durée du processus de démonstration. Aucun nom, contact, note ou autre donnée personnelle n’est demandé. Avant de persister des sessions ou d’ajouter une couche IA conversationnelle, le produit devra définir le consentement, les durées de rétention, l’export, la suppression et les contrôles d’accès.
