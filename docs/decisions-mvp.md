@@ -19,3 +19,12 @@ Le premier lot matérialise la consultation du marché de l'emploi et ses filtre
 Réponse : métadonnées de provenance, indicateurs clés, répartition des secteurs, métiers les plus demandés et entreprises recruteuses.
 
 Les valeurs multiples sont passées sous forme de liste séparée par des virgules. Les noms des paramètres sont explicites et homogènes avec le futur modèle de données.
+
+## Lot 2 — catalogue et fiches métiers
+
+Le catalogue est livré avec une catégorie dépliable à la fois, une recherche côté client et une fiche pour chaque métier. Les contrats sont :
+
+- `GET /api/metiers` : catégories et cartes de métiers ;
+- `GET /api/metiers/:id` : contenu complet d'une fiche métier.
+
+Les compétences, formations et organisations affichées sont des exemples de démonstration. Ils doivent être validés et sourcés avant toute diffusion publique. Les données de tendance et de volume restent dans le tableau de bord : elles ne sont pas affichées dans la fiche métier, conformément au cahier des charges.

@@ -1,4 +1,4 @@
-import type { Dashboard, FilterOptions, Filters } from './types';
+import type { Catalog, Dashboard, FilterOptions, Filters, JobDetail } from './types';
 
 async function request<T>(path: string): Promise<T> {
   const response = await fetch(path);
@@ -17,4 +17,12 @@ export function getDashboard(filters: Filters, limit: number) {
   if (filters.companies.length) params.set('companies', filters.companies.join(','));
   if (filters.employmentTypes.length) params.set('employmentTypes', filters.employmentTypes.join(','));
   return request<Dashboard>(`/api/dashboard?${params.toString()}`);
+}
+
+export function getCatalog() {
+  return request<Catalog>('/api/metiers');
+}
+
+export function getJob(id: string) {
+  return request<{ metadata: Catalog['metadata']; item: JobDetail }>(`/api/metiers/${encodeURIComponent(id)}`);
 }

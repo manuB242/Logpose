@@ -4,10 +4,12 @@ MVP de l'application d'orientation scolaire et professionnelle pour la Républiq
 
 ## Première livraison
 
-Cette première itération couvre le **lot 1** du cahier des charges :
+Les deux premières itérations couvrent les **lots 1 et 2** du cahier des charges :
 
 - tableau de bord du marché de l'emploi ;
 - filtres par zone, secteur, entreprise et type d'emploi ;
+- catalogue de métiers avec recherche, catégories et fiches détaillées ;
+- formations, compétences et organisations associées à chaque métier ;
 - API REST locale avec données de démonstration clairement identifiées ;
 - interface responsive pensée d'abord pour les usages mobiles.
 
