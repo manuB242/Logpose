@@ -1,39 +1,44 @@
 # LogPose
 
-MVP d’orientation scolaire et professionnelle pour la République du Congo.
+Application web d’orientation scolaire et professionnelle pour la République du Congo, réalisée en **PHP natif + MySQL**, sans framework.
 
-## Fonctionnalités livrées
+## Fonctionnalités
 
 - tableau de bord du marché de l’emploi et filtres par zone, secteur, entreprise et type d’emploi ;
 - catalogue de métiers, recherche, catégories et fiches détaillées ;
 - établissements et parcours filtrables par série, filière et métier ;
-- concours et références d’annales avec garde-fous sur les droits de diffusion ;
+- concours et références d’annales, avec garde-fous sur les droits de diffusion ;
 - orientation guidée par cinq questions dépendantes et recommandations explicables ;
-- interface React responsive en français.
+- interface responsive en français, conservant la charte visuelle LogPose.
 
-> Tous les indicateurs, référentiels, établissements, concours et recommandations actuellement affichés sont des données de démonstration. Ils ne constituent ni des statistiques officielles, ni une garantie d’admission ou d’emploi.
+> Les indicateurs, référentiels, établissements, concours et recommandations affichés sont des données de démonstration. Ils ne constituent ni des statistiques officielles, ni une garantie d’admission ou d’emploi.
 
-## Architecture
+## Stack sans framework
 
 ```text
-backend/                         # API REST PHP natif, sans framework
-├── config/app.php               # configuration applicative
-├── database/schema.sql          # structure MySQL / MariaDB
+backend/
+├── config/app.php               # configuration PHP
+├── database/schema.sql          # schéma MySQL / MariaDB
 ├── database/seed.sql            # données de démonstration
-├── public/index.php             # point d’entrée HTTP
-├── public/router.php            # routeur du serveur PHP intégré
-└── src/                         # PDO, requêtes HTTP, réponses et logique métier
-
-apps/web/                        # React + TypeScript + Vite
+├── public/
+│   ├── index.php                # point d’entrée web + API
+│   ├── router.php               # routeur du serveur PHP intégré
+│   └── assets/
+│       ├── app.css              # charte LogPose
+│       └── app.js               # interactions navigateur vanilla
+├── src/                         # API REST, PDO, HTTP et logique métier
+└── views/home.php               # document HTML rendu par PHP
 ```
 
-Le navigateur n’appelle que des URL relatives sous `/api`. Vite les transmet à l’API PHP en développement ; ce principe reste compatible avec un déploiement derrière le même domaine.
+Le site et l’API sont servis depuis le même domaine. Le navigateur appelle uniquement des URL relatives sous `/api` avec la Fetch API native.
 
 ## Prérequis
 
 - PHP **8.1+** avec les extensions `pdo_mysql` et `json` ;
 - MySQL **8+** ou MariaDB **10.6+** ;
-- Node.js 22+ et npm 10+ pour l’interface React.
+- un serveur HTTP avec PHP-FPM (production) ou le serveur intégré PHP (développement).
+
+Aucun package Composer, framework PHP, Node.js, React ou Vite n’est nécessaire.
 
 ## Initialiser la base de données
 
@@ -43,7 +48,7 @@ Le navigateur n’appelle que des URL relatives sous `/api`. Vite les transmet �
    mysql -u root -p < backend/database/schema.sql
    ```
 
-2. Créer un compte applicatif, puis lui accorder l’accès à la base `logpose` :
+2. Créer le compte applicatif puis lui donner accès à la base :
 
    ```sql
    CREATE USER 'logpose'@'localhost' IDENTIFIED BY 'change_this_password';
@@ -57,32 +62,28 @@ Le navigateur n’appelle que des URL relatives sous `/api`. Vite les transmet �
    mysql -u logpose -p logpose < backend/database/seed.sql
    ```
 
-4. Copier et ajuster la configuration locale :
+4. Créer la configuration locale :
 
    ```bash
    cp backend/.env.example backend/.env
    ```
 
-`backend/.env` est chargé sans dépendance externe et reste ignoré par Git.
-
 ## Démarrage local
 
 ```bash
-npm install
-npm run dev
+php -S 0.0.0.0:8787 -t backend/public backend/public/router.php
 ```
 
-- l’API PHP écoute sur le port `8787` ;
-- l’interface Vite écoute généralement sur le port `5173`.
+Le site est alors disponible sur `http://localhost:8787`.
 
-La commande utilise le serveur intégré PHP uniquement pour le développement. En production, servir `backend/public` derrière Nginx ou Apache avec PHP-FPM et injecter les variables d’environnement côté infrastructure.
+Le serveur intégré est réservé au développement. En production, servir `backend/public` derrière Nginx ou Apache avec PHP-FPM et renseigner les variables d’environnement côté infrastructure.
 
 ## Vérifications
 
 ```bash
-npm run build
 php -l backend/public/index.php
 php -l backend/src/Api.php
+php -l backend/views/home.php
 ```
 
 ## API principale
@@ -95,12 +96,11 @@ php -l backend/src/Api.php
 | Concours | `GET /api/concours/options`, `GET /api/concours`, `GET /api/concours/:slug/annales` |
 | Orientation | `POST /api/orientation/sessions`, `POST /api/orientation/sessions/:id/answers`, `GET /api/orientation/sessions/:id/recommandations` |
 
-Les réponses utilisent des requêtes PDO préparées. Les sessions d’orientation sont désormais stockées en MySQL, mais ne contiennent que les choix du questionnaire ; aucun nom, contact ou résultat scolaire n’est demandé.
+Les requêtes vers MySQL utilisent PDO et des instructions préparées. Les sessions d’orientation ne contiennent que les choix du questionnaire ; aucun nom, contact ou résultat scolaire n’est demandé.
 
 ## Suite recommandée
 
-1. Valider les sources, la fraîcheur et la méthode de calcul des données emploi.
+1. Valider la fraîcheur, les sources et la méthode de calcul des données emploi.
 2. Remplacer les référentiels de démonstration par des données contrôlées avec les partenaires.
 3. Ajouter les fiches établissement, conditions d’admission et annales dont les droits sont validés.
-4. Définir consentement, durées de conservation, export et suppression avant tout profil utilisateur authentifié.
-5. Évaluer une couche conversationnelle IA comme aide à la reformulation, sans remplacer les règles de compatibilité explicites.
+4. Définir consentement, durée de conservation, export et suppression avant tout profil utilisateur authentifié.

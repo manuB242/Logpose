@@ -8,7 +8,7 @@ Le premier lot matérialise la consultation du marché de l'emploi et ses filtre
 
 - **Mobile-first et français** : l'interface cible les terminaux mobiles à connectivité potentiellement limitée.
 - **URL relatives** : le client consomme `/api/*`, jamais une adresse `localhost` depuis le navigateur.
-- **API séparée** : API REST en PHP natif, sans framework, avec persistance MySQL et contrat disponible avant le choix définitif entre une app React Native et Flutter.
+- **Application unique PHP** : le web et l’API REST sont servis par le même point d’entrée PHP natif, avec persistance MySQL et URL relatives sous `/api`.
 - **Données traçables** : chaque réponse du tableau de bord contient une date de mise à jour et une mention de démonstration. La future source de données devra être ajoutée avant la mise en production.
 - **Pas de profil personnel dans ce lot** : l'authentification et la conversation d'orientation seront ajoutées après définition du consentement, de la rétention et de la suppression des données.
 
@@ -52,8 +52,8 @@ L’orientation démarre par une suite de cinq questions structurées. La deuxi�
 
 Les sessions sont maintenant persistées dans MySQL avec les seuls choix du questionnaire, sans nom, contact, note ou autre donnée personnelle. Avant d’introduire un profil authentifié ou une couche IA conversationnelle, le produit devra définir le consentement, les durées de rétention, l’export, la suppression et les contrôles d’accès.
 
-## Backend PHP + MySQL
+## Application web PHP + MySQL
 
-Le backend est implémenté sans framework dans `backend/`. Il utilise PDO avec émulation des requêtes préparées désactivée, un point d’entrée unique et un routeur explicite. Le schéma relationnel est versionné dans `backend/database/schema.sql` ; les données de démonstration sont séparées dans `backend/database/seed.sql`.
+Le web et l’API sont implémentés sans framework dans `backend/`. La vue PHP `views/home.php` charge une charte CSS et un JavaScript vanilla ; le même point d’entrée distribue les routes REST. PDO est utilisé avec émulation des requêtes préparées désactivée, un routeur explicite et un schéma relationnel versionné dans `backend/database/schema.sql`. Les données de démonstration sont séparées dans `backend/database/seed.sql`.
 
-Les identifiants de base restent exclusivement dans `backend/.env` (ignoré par Git), avec un modèle fourni dans `backend/.env.example`. Les routes ne dépendent pas du serveur Vite : celui-ci ne fait que proxyfier `/api` en développement.
+Les identifiants de base restent exclusivement dans `backend/.env` (ignoré par Git), avec un modèle fourni dans `backend/.env.example`. Le web PHP et les routes `/api` sont servis par le même domaine ; aucune couche de proxy, Node.js ou build front-end n’est nécessaire.

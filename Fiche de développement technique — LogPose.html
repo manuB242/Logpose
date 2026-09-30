@@ -4,23 +4,23 @@
 <p>Document complémentaire au cahier des charges. Objectif : cadrer les choix techniques pour l'implémentation des 9 écrans spécifiés (tableau de bord, filtres, catalogue métiers, fiche métier, orientation conversationnelle, recommandation de parcours, établissements, annales).</p>
 <hr>
 <h2>1. Architecture générale</h2>
-<pre><code>┌─────────────────────┐        ┌──────────────────────┐        ┌────────────────────┐
-│   Application mobile │  HTTPS │   API backend (REST   │        │   Base de données   │
-│   (iOS / Android)     │◄──────►│   ou GraphQL)         │◄──────►│   relationnelle      │
-└─────────────────────┘        └──────────┬───────────┘        └────────────────────┘
-                                            │
-                                            ▼
-                                ┌──────────────────────┐
-                                │  Service IA           │
-                                │  (assistant d&#39;orientation,
-                                │   scoring de parcours) │
-                                └──────────────────────┘
+<pre><code>┌────────────────────────────┐        ┌────────────────────┐
+│   Web PHP                   │        │   Base MySQL        │
+│   HTML / CSS / JS vanilla   │◄──────►│   relationnelle     │
+└──────────────┬─────────────┘  PDO   └────────────────────┘
+               │
+               ▼
+┌────────────────────────────┐
+│ API REST PHP native         │
+│ routes explicites / PDO     │
+│ moteur de règles orientation│
+└────────────────────────────┘
 </code></pre>
 <ul>
-<li><strong>Client</strong> : application mobile consommant une API via HTTPS/JSON.</li>
-<li><strong>Backend</strong> : expose les données du marché de l'emploi, le catalogue métiers/établissements/annales, et orchestre l'assistant d'orientation.</li>
-<li><strong>Service IA</strong> : isolé du reste du backend (latence et coûts différents), appelé pour la conversation d'orientation (2.5) et le scoring de compatibilité profil/parcours (2.6).</li>
-<li><strong>Stockage fichiers</strong> : bucket objet (type S3-compatible) pour les PDF d'annales, séparé de la base relationnelle.</li>
+<li><strong>Web</strong> : document rendu par PHP, avec CSS et JavaScript vanilla pour les interactions et appels relatifs sous <code>/api</code>.</li>
+<li><strong>API</strong> : routes REST PHP natives exposant le marché de l'emploi, le catalogue métiers/établissements/annales et le questionnaire d'orientation.</li>
+<li><strong>Moteur d'orientation</strong> : règles déterministes stockées côté PHP ; les questions et recommandations sont explicables sans dépendance IA.</li>
+<li><strong>Stockage</strong> : MySQL pour les données relationnelles et les sessions d'orientation ; bucket objet à prévoir ultérieurement pour les PDF dont les droits sont validés.</li>
 </ul>
 <hr>
 <h2>2. Stack proposée</h2>
@@ -34,14 +34,14 @@
 </thead>
 <tbody>
 <tr>
-<td>Application mobile</td>
-<td>Flutter <em>ou</em> React Native</td>
-<td>Un seul code pour iOS/Android ; équipe réduite. React Native consomme directement l'API REST PHP via HTTPS/JSON.</td>
+<td>Interface web MVP</td>
+<td>PHP natif + HTML, CSS et JavaScript vanilla</td>
+<td>Une seule application servie par PHP, sans framework ni chaîne de compilation ; conserve une expérience responsive adaptée au mobile.</td>
 </tr>
 <tr>
-<td>Gestion d'état</td>
-<td>Riverpod (Flutter) ou Redux Toolkit / Zustand (RN)</td>
-<td>Prévisibilité des filtres combinés (zone, secteur, entreprise, type d'emploi) partagés entre écrans.</td>
+<td>Gestion d'état côté interface</td>
+<td>JavaScript vanilla (objet d'état, événements DOM et Fetch API)</td>
+<td>Les filtres, parcours d'orientation et écrans sont gérés sans bibliothèque, avec des appels relatifs vers l'API PHP.</td>
 </tr>
 <tr>
 <td>Backend API</td>
@@ -50,8 +50,8 @@
 </tr>
 <tr>
 <td>Base de données</td>
-<td>PostgreSQL</td>
-<td>Données structurées et relationnelles (secteurs, métiers, établissements, concours) ; bon support des agrégations pour le tableau de bord.</td>
+<td>MySQL 8+ ou MariaDB 10.6+</td>
+<td>Données structurées et relationnelles (secteurs, métiers, établissements, concours) ; intégration PDO native avec PHP et hébergement largement disponible.</td>
 </tr>
 <tr>
 <td>Cache</td>
@@ -64,9 +64,9 @@
 <td>Hébergement des PDF d'annales, faible coût, CDN possible.</td>
 </tr>
 <tr>
-<td>Assistant d'orientation</td>
-<td>Appel à un modèle de langage via API (ex. Claude) avec prompt système dédié</td>
-<td>Pas d'entraînement de modèle propriétaire nécessaire au démarrage.</td>
+<td>Orientation guidée</td>
+<td>Moteur de règles PHP et questions dépendantes</td>
+<td>Recommandations transparentes, auditables et sans dépendance IA pour le MVP.</td>
 </tr>
 <tr>
 <td>Authentification</td>
@@ -193,12 +193,12 @@
 <tr>
 <td>2.5 Conversation d'orientation</td>
 <td><code>ChatThread</code>, <code>MessageBubble</code>, <code>ChatInput</code></td>
-<td><code>POST /orientation/messages</code> (appel service IA), état de session côté client + serveur</td>
+<td><code>POST /orientation/sessions</code>, puis <code>POST /orientation/sessions/:id/answers</code> ; état de session persisté MySQL</td>
 </tr>
 <tr>
 <td>2.6 Recommandation de parcours</td>
 <td><code>ProfileSummary</code>, <code>CompatibilityCard</code> (Congo/international)</td>
-<td><code>GET /orientation/recommandations?session_id=</code></td>
+<td><code>GET /orientation/sessions/:id/recommandations</code></td>
 </tr>
 <tr>
 <td>2.7 Établissements</td>
@@ -222,7 +222,7 @@
 <ul>
 <li><strong>Agrégations du tableau de bord</strong> : précalculer/cacher (Redis) les combinaisons de filtres les plus fréquentes ; éviter de recalculer les pourcentages sectoriels à chaque requête si le volume de <code>IndicateurEmploi</code> devient important.</li>
 <li><strong>Paramètre n (top métiers)</strong> : borné côté API (ex. max 50) pour éviter des payloads excessifs.</li>
-<li><strong>Service IA (2.5/2.6)</strong> : conserver l'historique de conversation côté serveur (pas uniquement client) pour permettre la reprise de session et l'audit des recommandations ; définir un prompt système strict pour limiter les dérives hors sujet orientation.</li>
+<li><strong>Questionnaire d'orientation (2.5/2.6)</strong> : persister les réponses structurées côté serveur ; valider chaque réponse contre la question dépendante en cours et conserver les règles de compatibilité versionnées et auditables.</li>
 <li><strong>Téléchargement des annales</strong> : utiliser des URLs signées à durée limitée plutôt que des liens publics permanents vers le bucket.</li>
 <li><strong>Connectivité limitée</strong> : prévoir un mode cache local (dernier tableau de bord chargé, dernières fiches métiers consultées) pour un usage en connexion intermittente.</li>
 <li><strong>Confidentialité</strong> : les échanges de la conversation d'orientation (2.5) contiennent des données personnelles sensibles au sens du cahier des charges (§3.5) — chiffrement au repos et politique de rétention à définir.</li>
@@ -234,7 +234,7 @@ GET  /filtres/options
 GET  /metiers
 GET  /metiers/:id
 POST /orientation/sessions
-POST /orientation/sessions/:id/messages
+POST /orientation/sessions/:id/answers
 GET  /orientation/sessions/:id/recommandations
 GET  /etablissements
 GET  /concours
@@ -270,7 +270,7 @@ GET  /annales/:id/telechargement   (URL signée)
 <tr>
 <td><strong>Lot 4</strong></td>
 <td>Assistant d'orientation + recommandations (2.5, 2.6)</td>
-<td>Intégration service IA, définition du modèle de scoring</td>
+<td>Moteur PHP de questions dépendantes et règles de compatibilité validées</td>
 </tr>
 </tbody>
 </table>

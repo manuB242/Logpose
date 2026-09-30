@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Laisser Apache servir les assets publics existants.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Le point d’entrée PHP rend le web et distribue les routes /api.
+RewriteRule ^ index.php [QSA,L]

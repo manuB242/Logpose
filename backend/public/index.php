@@ -25,6 +25,18 @@ $config = require dirname(__DIR__) . '/config/app.php';
 
 try {
     $request = Request::fromGlobals();
+
+    // Le même point d’entrée sert le web PHP et l’API JSON.
+    // Le document HTML peut donc être affiché même lorsqu’une base locale n’est
+    // pas encore configurée ; les appels dynamiques signaleront alors l’erreur.
+    if (!str_starts_with($request->path, '/api')) {
+        if ($request->method !== 'GET') {
+            throw new ApiException('Méthode non autorisée.', 405);
+        }
+        require dirname(__DIR__) . '/views/home.php';
+        exit;
+    }
+
     if ($request->method === 'OPTIONS') {
         Response::json([], 204);
     }
