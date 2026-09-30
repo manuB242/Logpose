@@ -8,7 +8,7 @@ Le premier lot matérialise la consultation du marché de l'emploi et ses filtre
 
 - **Mobile-first et français** : l'interface cible les terminaux mobiles à connectivité potentiellement limitée.
 - **URL relatives** : le client consomme `/api/*`, jamais une adresse `localhost` depuis le navigateur.
-- **API séparée** : le contrat REST est disponible avant le choix définitif entre une app React Native et Flutter.
+- **API séparée** : API REST en PHP natif, sans framework, avec persistance MySQL et contrat disponible avant le choix définitif entre une app React Native et Flutter.
 - **Données traçables** : chaque réponse du tableau de bord contient une date de mise à jour et une mention de démonstration. La future source de données devra être ajoutée avant la mise en production.
 - **Pas de profil personnel dans ce lot** : l'authentification et la conversation d'orientation seront ajoutées après définition du consentement, de la rétention et de la suppression des données.
 
@@ -50,4 +50,10 @@ L’orientation démarre par une suite de cinq questions structurées. La deuxi�
 - `POST /api/orientation/sessions/:id/answers` : valide une réponse et retourne la question dépendante suivante ;
 - `GET /api/orientation/sessions/:id/recommandations` : retourne le profil résumé et les trois pistes priorisées après la dernière réponse.
 
-Les sessions sont actuellement conservées uniquement en mémoire pour la durée du processus de démonstration. Aucun nom, contact, note ou autre donnée personnelle n’est demandé. Avant de persister des sessions ou d’ajouter une couche IA conversationnelle, le produit devra définir le consentement, les durées de rétention, l’export, la suppression et les contrôles d’accès.
+Les sessions sont maintenant persistées dans MySQL avec les seuls choix du questionnaire, sans nom, contact, note ou autre donnée personnelle. Avant d’introduire un profil authentifié ou une couche IA conversationnelle, le produit devra définir le consentement, les durées de rétention, l’export, la suppression et les contrôles d’accès.
+
+## Backend PHP + MySQL
+
+Le backend est implémenté sans framework dans `backend/`. Il utilise PDO avec émulation des requêtes préparées désactivée, un point d’entrée unique et un routeur explicite. Le schéma relationnel est versionné dans `backend/database/schema.sql` ; les données de démonstration sont séparées dans `backend/database/seed.sql`.
+
+Les identifiants de base restent exclusivement dans `backend/.env` (ignoré par Git), avec un modèle fourni dans `backend/.env.example`. Les routes ne dépendent pas du serveur Vite : celui-ci ne fait que proxyfier `/api` en développement.

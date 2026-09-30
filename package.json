@@ -5,7 +5,7 @@
   "description": "MVP de LogPose — orientation scolaire et professionnelle au Congo.",
   "scripts": {
     "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "node apps/api/src/server.js",
+    "dev:api": "php -S 0.0.0.0:8787 -t backend/public backend/public/router.php",
     "dev:web": "vite --host 0.0.0.0 --config apps/web/vite.config.ts",
     "build": "tsc --project apps/web/tsconfig.json && vite build --config apps/web/vite.config.ts",
     "preview": "vite preview --host 0.0.0.0 --config apps/web/vite.config.ts"
