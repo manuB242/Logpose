@@ -1,0 +1,280 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>Fiche de développement technique — LogPose</h1>
+<p>Document complémentaire au cahier des charges. Objectif : cadrer les choix techniques pour l'implémentation des 9 écrans spécifiés (tableau de bord, filtres, catalogue métiers, fiche métier, orientation conversationnelle, recommandation de parcours, établissements, annales).</p>
+<hr>
+<h2>1. Architecture générale</h2>
+<pre><code>┌─────────────────────┐        ┌──────────────────────┐        ┌────────────────────┐
+│   Application mobile │  HTTPS │   API backend (REST   │        │   Base de données   │
+│   (iOS / Android)     │◄──────►│   ou GraphQL)         │◄──────►│   relationnelle      │
+└─────────────────────┘        └──────────┬───────────┘        └────────────────────┘
+                                            │
+                                            ▼
+                                ┌──────────────────────┐
+                                │  Service IA           │
+                                │  (assistant d&#39;orientation,
+                                │   scoring de parcours) │
+                                └──────────────────────┘
+</code></pre>
+<ul>
+<li><strong>Client</strong> : application mobile consommant une API via HTTPS/JSON.</li>
+<li><strong>Backend</strong> : expose les données du marché de l'emploi, le catalogue métiers/établissements/annales, et orchestre l'assistant d'orientation.</li>
+<li><strong>Service IA</strong> : isolé du reste du backend (latence et coûts différents), appelé pour la conversation d'orientation (2.5) et le scoring de compatibilité profil/parcours (2.6).</li>
+<li><strong>Stockage fichiers</strong> : bucket objet (type S3-compatible) pour les PDF d'annales, séparé de la base relationnelle.</li>
+</ul>
+<hr>
+<h2>2. Stack proposée</h2>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Choix proposé</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Application mobile</td>
+<td>Flutter <em>ou</em> React Native</td>
+<td>Un seul code pour iOS/Android ; équipe réduite. React Native s'aligne avec l'existant Node.js déjà utilisé sur d'autres projets.</td>
+</tr>
+<tr>
+<td>Gestion d'état</td>
+<td>Riverpod (Flutter) ou Redux Toolkit / Zustand (RN)</td>
+<td>Prévisibilité des filtres combinés (zone, secteur, entreprise, type d'emploi) partagés entre écrans.</td>
+</tr>
+<tr>
+<td>Backend API</td>
+<td>Node.js (NestJS ou Express)</td>
+<td>Cohérent avec les compétences déjà mobilisées (Node.js) ; écosystème mature pour REST/GraphQL.</td>
+</tr>
+<tr>
+<td>Base de données</td>
+<td>PostgreSQL</td>
+<td>Données structurées et relationnelles (secteurs, métiers, établissements, concours) ; bon support des agrégations pour le tableau de bord.</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>Redis</td>
+<td>Résultats du tableau de bord (agrégats par période/filtres) coûteux à recalculer à chaque appel.</td>
+</tr>
+<tr>
+<td>Stockage fichiers</td>
+<td>S3-compatible (ex. Scaleway, OVH, ou AWS S3)</td>
+<td>Hébergement des PDF d'annales, faible coût, CDN possible.</td>
+</tr>
+<tr>
+<td>Assistant d'orientation</td>
+<td>Appel à un modèle de langage via API (ex. Claude) avec prompt système dédié</td>
+<td>Pas d'entraînement de modèle propriétaire nécessaire au démarrage.</td>
+</tr>
+<tr>
+<td>Authentification</td>
+<td>JWT + refresh token</td>
+<td>Standard, compatible mobile.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Ces choix sont des recommandations de départ, à valider selon les compétences disponibles dans l'équipe et les contraintes d'hébergement au Congo (connectivité, coût data).</em></p>
+<hr>
+<h2>3. Modèle de données (entités principales)</h2>
+<table>
+<thead>
+<tr>
+<th>Entité</th>
+<th>Champs clés</th>
+<th>Relations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Periode</strong></td>
+<td>id, type (annuel/pluriannuel), libellé (ex. &quot;2025&quot;, &quot;2021–2025&quot;), date_debut, date_fin</td>
+<td>1—N vers <code>IndicateurEmploi</code></td>
+</tr>
+<tr>
+<td><strong>IndicateurEmploi</strong></td>
+<td>id, periode_id, zone_id, secteur_id, type_emploi, nb_emplois_crees</td>
+<td>N—1 vers <code>Periode</code>, <code>Zone</code>, <code>Secteur</code></td>
+</tr>
+<tr>
+<td><strong>Secteur</strong></td>
+<td>id, nom</td>
+<td>1—N vers <code>IndicateurEmploi</code>, <code>Metier</code></td>
+</tr>
+<tr>
+<td><strong>Zone</strong></td>
+<td>id, nom (région/ville)</td>
+<td>1—N vers <code>IndicateurEmploi</code></td>
+</tr>
+<tr>
+<td><strong>Entreprise</strong></td>
+<td>id, nom, secteur_id</td>
+<td>N—N vers <code>Offre</code></td>
+</tr>
+<tr>
+<td><strong>Metier</strong></td>
+<td>id, nom, categorie_id, description, competences (liste), nb_offres_actives, tendance</td>
+<td>N—1 vers <code>CategorieMetier</code>, N—N vers <code>Formation</code>, <code>Entreprise</code></td>
+</tr>
+<tr>
+<td><strong>CategorieMetier</strong></td>
+<td>id, nom (ex. numérique, industriel, environnement, santé)</td>
+<td>1—N vers <code>Metier</code></td>
+</tr>
+<tr>
+<td><strong>Formation</strong></td>
+<td>id, nom, filiere_id, etablissement_id</td>
+<td>N—1 vers <code>Filiere</code>, <code>Etablissement</code></td>
+</tr>
+<tr>
+<td><strong>Filiere</strong></td>
+<td>id, nom, series_bac_compatibles (liste)</td>
+<td>1—N vers <code>Formation</code>, <code>Concours</code></td>
+</tr>
+<tr>
+<td><strong>Etablissement</strong></td>
+<td>id, nom, ville, pays</td>
+<td>1—N vers <code>Formation</code></td>
+</tr>
+<tr>
+<td><strong>Concours</strong></td>
+<td>id, nom, organisme, filiere_id, series_bac_compatibles</td>
+<td>1—N vers <code>Annale</code></td>
+</tr>
+<tr>
+<td><strong>Annale</strong></td>
+<td>id, concours_id, annee, type_document (sujet/corrigé), url_fichier</td>
+<td>N—1 vers <code>Concours</code></td>
+</tr>
+<tr>
+<td><strong>ProfilUtilisateur</strong></td>
+<td>id, serie_bac, centres_interet (liste), mode_travail_prefere</td>
+<td>1—N vers <code>SessionOrientation</code></td>
+</tr>
+<tr>
+<td><strong>SessionOrientation</strong></td>
+<td>id, profil_id, historique_messages, metier_cible_id, recommandations (liste scorée)</td>
+<td>N—1 vers <code>ProfilUtilisateur</code>, <code>Metier</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>4. Découpage écran → composants → données</h2>
+<table>
+<thead>
+<tr>
+<th>Écran</th>
+<th>Composants clés</th>
+<th>Source de données</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1 Tableau de bord</td>
+<td><code>PeriodSelector</code>, <code>KpiPair</code> (emplois créés / YtD), <code>SectorPieChart</code>, <code>TopMetiersBarChart</code> (paramètre n), <code>TopEntreprisesChips</code></td>
+<td><code>GET /dashboard?periode=&amp;zone=&amp;secteur=&amp;entreprise=&amp;type_emploi=&amp;n=</code></td>
+</tr>
+<tr>
+<td>2.2 Filtres</td>
+<td><code>FilterSheet</code> avec 4 groupes de <code>ChipMultiSelect</code></td>
+<td><code>GET /filtres/options</code> (listes de valeurs)</td>
+</tr>
+<tr>
+<td>2.3 Catalogue métiers</td>
+<td><code>CategoryAccordion</code>, <code>MetierListItem</code></td>
+<td><code>GET /metiers?categorie=</code></td>
+</tr>
+<tr>
+<td>2.4 Fiche métier</td>
+<td><code>MetierHeader</code>, <code>SkillChips</code>, <code>EntrepriseChips</code>, <code>FormationList</code></td>
+<td><code>GET /metiers/:id</code></td>
+</tr>
+<tr>
+<td>2.5 Conversation d'orientation</td>
+<td><code>ChatThread</code>, <code>MessageBubble</code>, <code>ChatInput</code></td>
+<td><code>POST /orientation/messages</code> (appel service IA), état de session côté client + serveur</td>
+</tr>
+<tr>
+<td>2.6 Recommandation de parcours</td>
+<td><code>ProfileSummary</code>, <code>CompatibilityCard</code> (Congo/international)</td>
+<td><code>GET /orientation/recommandations?session_id=</code></td>
+</tr>
+<tr>
+<td>2.7 Établissements</td>
+<td><code>FilterBar</code> (série, filière, métier), <code>EtablissementListItem</code></td>
+<td><code>GET /etablissements?serie=&amp;filiere=&amp;metier=</code></td>
+</tr>
+<tr>
+<td>2.8 Annales — liste</td>
+<td><code>FilterBar</code> (série, filière), <code>ConcoursListItem</code></td>
+<td><code>GET /concours?serie=&amp;filiere=</code></td>
+</tr>
+<tr>
+<td>2.9 Annales — détail</td>
+<td><code>DocumentRow</code> (aperçu / téléchargement)</td>
+<td><code>GET /concours/:id/annales</code>, téléchargement via URL signée du bucket</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5. Points d'attention techniques</h2>
+<ul>
+<li><strong>Agrégations du tableau de bord</strong> : précalculer/cacher (Redis) les combinaisons de filtres les plus fréquentes ; éviter de recalculer les pourcentages sectoriels à chaque requête si le volume de <code>IndicateurEmploi</code> devient important.</li>
+<li><strong>Paramètre n (top métiers)</strong> : borné côté API (ex. max 50) pour éviter des payloads excessifs.</li>
+<li><strong>Service IA (2.5/2.6)</strong> : conserver l'historique de conversation côté serveur (pas uniquement client) pour permettre la reprise de session et l'audit des recommandations ; définir un prompt système strict pour limiter les dérives hors sujet orientation.</li>
+<li><strong>Téléchargement des annales</strong> : utiliser des URLs signées à durée limitée plutôt que des liens publics permanents vers le bucket.</li>
+<li><strong>Connectivité limitée</strong> : prévoir un mode cache local (dernier tableau de bord chargé, dernières fiches métiers consultées) pour un usage en connexion intermittente.</li>
+<li><strong>Confidentialité</strong> : les échanges de la conversation d'orientation (2.5) contiennent des données personnelles sensibles au sens du cahier des charges (§3.5) — chiffrement au repos et politique de rétention à définir.</li>
+</ul>
+<hr>
+<h2>6. API — endpoints principaux (synthèse REST)</h2>
+<pre><code>GET  /dashboard
+GET  /filtres/options
+GET  /metiers
+GET  /metiers/:id
+POST /orientation/sessions
+POST /orientation/sessions/:id/messages
+GET  /orientation/sessions/:id/recommandations
+GET  /etablissements
+GET  /concours
+GET  /concours/:id/annales
+GET  /annales/:id/telechargement   (URL signée)
+</code></pre>
+<hr>
+<h2>7. Découpage indicatif en lots de développement</h2>
+<table>
+<thead>
+<tr>
+<th>Lot</th>
+<th>Contenu</th>
+<th>Dépendances</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Lot 1</strong></td>
+<td>Modèle de données + tableau de bord + filtres (2.1, 2.2)</td>
+<td>Source de données emploi disponible</td>
+</tr>
+<tr>
+<td><strong>Lot 2</strong></td>
+<td>Catalogue métiers + fiche métier (2.3, 2.4)</td>
+<td>Référentiel métiers/compétences/formations saisi</td>
+</tr>
+<tr>
+<td><strong>Lot 3</strong></td>
+<td>Établissements + annales (2.7, 2.8, 2.9)</td>
+<td>Référentiel établissements/concours + bucket fichiers</td>
+</tr>
+<tr>
+<td><strong>Lot 4</strong></td>
+<td>Assistant d'orientation + recommandations (2.5, 2.6)</td>
+<td>Intégration service IA, définition du modèle de scoring</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Document de travail technique — les choix de stack et l'architecture sont des propositions à valider en équipe avant le lancement du développement.</em></p>
+
+</body></html>

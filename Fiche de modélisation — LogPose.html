@@ -1,0 +1,307 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>Fiche de modélisation — LogPose</h1>
+<p>Document complémentaire au cahier des charges et à la fiche de développement technique. Il formalise le fonctionnement de LogPose à travers quatre modélisations : cas d'utilisation, modèle de données, scénarios de séquence et cycle de vie d'une session d'orientation.</p>
+<hr>
+<h2>1. Diagramme de cas d'utilisation</h2>
+<pre class="mermaid">flowchart LR
+  actorU((Utilisateur))
+  actorIA((Assistant IA))
+
+  UC1([Consulter le tableau de bord])
+  UC2([Filtrer le marché de l&#39;emploi])
+  UC3([Explorer le catalogue des métiers])
+  UC4([Consulter une fiche métier])
+  UC5([Dialoguer avec l&#39;assistant d&#39;orientation])
+  UC6([Obtenir des recommandations de parcours])
+  UC7([Rechercher des établissements])
+  UC8([Rechercher des concours])
+  UC9([Consulter / télécharger une annale])
+
+  actorU --&gt; UC1
+  actorU --&gt; UC2
+  actorU --&gt; UC3
+  actorU --&gt; UC4
+  actorU --&gt; UC5
+  actorU --&gt; UC6
+  actorU --&gt; UC7
+  actorU --&gt; UC8
+  actorU --&gt; UC9
+  actorIA --&gt; UC5
+  actorIA --&gt; UC6
+
+  UC2 -. inclut .-&gt; UC1
+  UC4 -. inclut .-&gt; UC3
+  UC6 -. inclut .-&gt; UC5
+</pre>
+<p><strong>Lecture</strong> : l'utilisateur est l'acteur principal de tous les cas d'usage. L'assistant IA intervient comme acteur secondaire sur la conversation d'orientation et le calcul des recommandations. Le filtrage (UC2) est une variante incluse de la consultation du tableau de bord (UC1) ; la consultation d'une fiche métier (UC4) découle de l'exploration du catalogue (UC3) ; les recommandations (UC6) s'appuient sur la conversation d'orientation (UC5).</p>
+<hr>
+<h2>2. Modèle de données (diagramme entité-relation)</h2>
+<pre class="mermaid">erDiagram
+    PERIODE ||--o{ INDICATEUR_EMPLOI : contient
+    ZONE ||--o{ INDICATEUR_EMPLOI : concerne
+    SECTEUR ||--o{ INDICATEUR_EMPLOI : concerne
+    SECTEUR ||--o{ METIER : regroupe
+    CATEGORIE_METIER ||--o{ METIER : classe
+    METIER ||--o{ OFFRE : genere
+    ENTREPRISE ||--o{ OFFRE : publie
+    ZONE ||--o{ OFFRE : localise
+    METIER }o--o{ FORMATION : requiert
+    FORMATION }o--|| FILIERE : appartient
+    FORMATION }o--|| ETABLISSEMENT : dispensee_par
+    FILIERE ||--o{ CONCOURS : associe
+    CONCOURS ||--o{ ANNALE : possede
+    PROFIL_UTILISATEUR ||--o{ SESSION_ORIENTATION : initie
+    SESSION_ORIENTATION }o--|| METIER : cible
+    SESSION_ORIENTATION ||--o{ RECOMMANDATION : produit
+    RECOMMANDATION }o--|| FORMATION : recommande
+
+    PERIODE {
+        int id PK
+        string type
+        string libelle
+        date date_debut
+        date date_fin
+    }
+    ZONE {
+        int id PK
+        string nom
+    }
+    SECTEUR {
+        int id PK
+        string nom
+    }
+    INDICATEUR_EMPLOI {
+        int id PK
+        int periode_id FK
+        int zone_id FK
+        int secteur_id FK
+        string type_emploi
+        int nb_emplois_crees
+    }
+    CATEGORIE_METIER {
+        int id PK
+        string nom
+    }
+    METIER {
+        int id PK
+        string nom
+        int categorie_id FK
+        int secteur_id FK
+        string description
+        string competences
+        int nb_offres_actives
+        string tendance
+    }
+    ENTREPRISE {
+        int id PK
+        string nom
+        int secteur_id FK
+    }
+    OFFRE {
+        int id PK
+        int metier_id FK
+        int entreprise_id FK
+        int zone_id FK
+        string type_emploi
+        date date_publication
+    }
+    FORMATION {
+        int id PK
+        string nom
+        int filiere_id FK
+        int etablissement_id FK
+    }
+    FILIERE {
+        int id PK
+        string nom
+        string series_bac_compatibles
+    }
+    ETABLISSEMENT {
+        int id PK
+        string nom
+        string ville
+        string pays
+    }
+    CONCOURS {
+        int id PK
+        string nom
+        string organisme
+        int filiere_id FK
+        string series_bac_compatibles
+    }
+    ANNALE {
+        int id PK
+        int concours_id FK
+        int annee
+        string type_document
+        string url_fichier
+    }
+    PROFIL_UTILISATEUR {
+        int id PK
+        string serie_bac
+        string centres_interet
+        string mode_travail_prefere
+    }
+    SESSION_ORIENTATION {
+        int id PK
+        int profil_id FK
+        int metier_cible_id FK
+        string statut
+    }
+    RECOMMANDATION {
+        int id PK
+        int session_id FK
+        int formation_id FK
+        float score_compatibilite
+        string zone_geo
+    }
+</pre>
+<p><strong>Notes de lecture</strong> : <code>||--o{</code> signifie « un à plusieurs » (ex. une <code>PERIODE</code> contient plusieurs <code>INDICATEUR_EMPLOI</code>) ; <code>}o--o{</code> signifie « plusieurs à plusieurs » (ex. un <code>METIER</code> peut requérir plusieurs <code>FORMATION</code>, et une <code>FORMATION</code> peut préparer à plusieurs <code>METIER</code>).</p>
+<hr>
+<h2>3. Diagrammes de séquence</h2>
+<h3>3.1 Consultation du tableau de bord avec filtres</h3>
+<pre class="mermaid">sequenceDiagram
+    actor U as Utilisateur
+    participant App as Application mobile
+    participant API as API backend
+    participant Cache as Cache (Redis)
+    participant DB as Base de données
+
+    U-&gt;&gt;App: Sélectionne période + filtres (zone, secteur, entreprise, type)
+    App-&gt;&gt;API: GET /dashboard?periode&amp;zone&amp;secteur&amp;entreprise&amp;type&amp;n
+    API-&gt;&gt;Cache: Vérifie si le résultat est en cache
+    alt Résultat en cache
+        Cache--&gt;&gt;API: Données agrégées
+    else Cache absent
+        API-&gt;&gt;DB: Requête d&#39;agrégation (indicateurs, secteurs, top métiers, entreprises)
+        DB--&gt;&gt;API: Données brutes
+        API-&gt;&gt;Cache: Met en cache le résultat
+    end
+    API--&gt;&gt;App: JSON (KPI, secteurs, top n métiers, top 5 entreprises)
+    App--&gt;&gt;U: Affiche le tableau de bord mis à jour
+</pre>
+<h3>3.2 Conversation d'orientation → recommandation de parcours</h3>
+<pre class="mermaid">sequenceDiagram
+    actor U as Utilisateur
+    participant App as Application mobile
+    participant API as API backend
+    participant IA as Service IA
+    participant DB as Base de données
+
+    U-&gt;&gt;App: Ouvre l&#39;assistant d&#39;orientation
+    App-&gt;&gt;API: POST /orientation/sessions
+    API-&gt;&gt;DB: Crée SessionOrientation (statut = Ouverte)
+    API--&gt;&gt;App: session_id
+
+    loop Échange conversationnel
+        U-&gt;&gt;App: Envoie un message
+        App-&gt;&gt;API: POST /orientation/sessions/:id/messages
+        API-&gt;&gt;IA: Prompt + historique de conversation
+        IA--&gt;&gt;API: Question suivante / éléments de profil détectés
+        API-&gt;&gt;DB: Met à jour ProfilUtilisateur (série bac, intérêts, mode de travail)
+        API--&gt;&gt;App: Réponse de l&#39;assistant
+    end
+
+    U-&gt;&gt;App: Sélectionne un métier cible
+    App-&gt;&gt;API: GET /orientation/sessions/:id/recommandations
+    API-&gt;&gt;IA: Calcul de compatibilité (profil + métier)
+    IA--&gt;&gt;API: Liste de parcours scorés (Congo / international)
+    API-&gt;&gt;DB: Enregistre les Recommandation
+    API--&gt;&gt;App: Parcours recommandés triés par score
+    App--&gt;&gt;U: Affiche l&#39;écran de recommandation
+</pre>
+<hr>
+<h2>4. Diagramme d'état — cycle de vie d'une session d'orientation</h2>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Ouverte
+    Ouverte --&gt; EnCollecteProfil : premier message envoyé
+    EnCollecteProfil --&gt; ProfilComplet : critères suffisants identifiés
+    ProfilComplet --&gt; MetierSelectionne : utilisateur choisit un métier
+    MetierSelectionne --&gt; RecommandationsGenerees : scoring effectué
+    RecommandationsGenerees --&gt; [*]
+    EnCollecteProfil --&gt; Abandonnee : session inactive au-delà du délai
+    ProfilComplet --&gt; Abandonnee : session inactive au-delà du délai
+    Abandonnee --&gt; [*]
+</pre>
+<hr>
+<p><em>Document de travail — à ajuster au fil de l'affinement du modèle de données et des règles de scoring des recommandations.</em></p>
+
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+</body></html>

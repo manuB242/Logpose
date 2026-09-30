@@ -1,0 +1,270 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>Cahier des charges — LogPose</h1>
+<p><strong>Application mobile d'orientation scolaire et professionnelle</strong>
+Marché de référence : République du Congo (Brazzaville, Pointe-Noire et zones connexes)</p>
+<hr>
+<h2>1. Présentation du projet</h2>
+<h3>1.1 Contexte</h3>
+<p>Au Congo, les élèves en fin de secondaire (série du baccalauréat) et les jeunes diplômés manquent d'un outil centralisé pour comprendre le marché de l'emploi local, identifier les métiers porteurs, choisir une filière de formation adaptée à leur profil et préparer les concours d'accès aux établissements. LogPose répond à ce besoin en combinant données du marché de l'emploi, orientation assistée par IA et ressources de préparation aux concours.</p>
+<h3>1.2 Objectifs du produit</h3>
+<ul>
+<li>Donner une vision claire et actualisée du marché de l'emploi congolais (volumes, secteurs, métiers en tension, entreprises qui recrutent).</li>
+<li>Aider chaque utilisateur à identifier des filières et métiers compatibles avec son profil (série du bac, centres d'intérêt, contraintes).</li>
+<li>Orienter vers des établissements et parcours de formation concrets, au Congo comme à l'international.</li>
+<li>Fournir des ressources de préparation aux concours d'entrée (annales).</li>
+</ul>
+<h3>1.3 Utilisateurs cibles</h3>
+<table>
+<thead>
+<tr>
+<th>Profil</th>
+<th>Besoin principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lycéen en série terminale / nouveau bachelier</td>
+<td>Comprendre les options de filières et de métiers après le bac</td>
+</tr>
+<tr>
+<td>Étudiant en réorientation</td>
+<td>Explorer d'autres métiers/filières compatibles avec son profil</td>
+</tr>
+<tr>
+<td>Candidat à un concours</td>
+<td>Trouver et s'entraîner sur les annales pertinentes</td>
+</tr>
+<tr>
+<td>Établissement / partenaire (usage secondaire)</td>
+<td>Visibilité sur ses formations dans le catalogue</td>
+</tr>
+</tbody>
+</table>
+<h3>1.4 Porteur du projet</h3>
+<p>Projet développé par Pain-sama, dans le cadre de la formation Apprenant Product Manager (Cohorte 2) à Akieni Academy.</p>
+<hr>
+<h2>2. Périmètre fonctionnel</h2>
+<p>L'application se compose de 9 écrans principaux, détaillés ci-dessous. Chaque fiche décrit : l'objectif de l'écran, son contenu, les interactions attendues et les paramètres/filtres associés.</p>
+<h3>2.1 Tableau de bord — Marché de l'emploi</h3>
+<p><strong>Objectif</strong> : donner une vue synthétique et filtrable du marché de l'emploi congolais.</p>
+<p><strong>Contenu et disposition (de haut en bas)</strong> :</p>
+<ol>
+<li><strong>Paramètres en tête d'écran</strong> : sélecteur de périodicité (Annuel / Pluriannuel), avec sous-sélecteur d'années ou de plages pluriannuelles ; accès aux filtres.</li>
+<li><strong>Indicateurs clés côte à côte</strong> : nombre d'emplois créés sur la période sélectionnée, et variation Year-to-Date (YtD) associée.</li>
+<li><strong>Répartition par secteur d'activité</strong> : présentée sous forme de camembert (diagramme circulaire), avec légende indiquant le libellé du secteur et son pourcentage.</li>
+<li><strong>Top métiers recherchés</strong> : diagramme en barres horizontales classées du plus grand au plus petit nombre d'offres. Un paramètre <strong>n</strong> (réglable par l'utilisateur, via un contrôle pas-à-pas ou une saisie) détermine le nombre de métiers affichés (ex. top 5, top 10, top 20).</li>
+<li><strong>Top 5 des entreprises qui recrutent</strong> : affiché sous forme de chips, chaque chip indiquant le nom de l'entreprise et son nombre d'emplois créés sur la période.</li>
+</ol>
+<p><strong>Filtres</strong> (accessibles depuis cet écran, cf. 2.2) :</p>
+<ul>
+<li>Zone géographique</li>
+<li>Secteur d'activité</li>
+<li>Entreprise</li>
+<li>Type d'emploi</li>
+</ul>
+<p><strong>Données</strong> : issues d'une source à définir (statistiques officielles de l'emploi, partenaires recruteurs, ou agrégation d'offres). Les maquettes actuelles utilisent des données de démonstration.</p>
+<hr>
+<h3>2.2 Écran de filtres</h3>
+<p><strong>Objectif</strong> : permettre d'affiner le tableau de bord selon quatre critères combinables.</p>
+<p><strong>Contenu</strong> :</p>
+<ul>
+<li><strong>Zone géographique</strong> (sélection unique ou multiple) : ex. Brazzaville, Pointe-Noire, Pool, Niari, Bouenza, Cuvette, Sangha, ou « Toutes les régions ».</li>
+<li><strong>Secteur d'activité</strong> (sélection multiple) : liste des secteurs du marché de l'emploi (agriculture, BTP, commerce, télécoms, etc.).</li>
+<li><strong>Entreprise</strong> (sélection, avec recherche si la liste est longue) : entreprises recruteuses identifiées sur le marché.</li>
+<li><strong>Type d'emploi</strong> (sélection multiple) : CDI, CDD, Stage, Intérim, Freelance/Indépendant, Alternance.</li>
+</ul>
+<p><strong>Interactions</strong> : chips à bascule (multi-sélection), bouton <strong>Réinitialiser</strong> (efface tous les filtres) et bouton <strong>Appliquer</strong> (ferme le panneau et met à jour le tableau de bord). Le bouton d'ouverture des filtres affiche le nombre de filtres actifs.</p>
+<hr>
+<h3>2.3 Catalogue des métiers par catégorie</h3>
+<p><strong>Objectif</strong> : permettre l'exploration des métiers regroupés par grande famille professionnelle.</p>
+<p><strong>Contenu</strong> :</p>
+<ul>
+<li>Liste de catégories dépliables (accordéon), par exemple :
+<ul>
+<li><strong>Métiers du numérique</strong> : Product Manager, Scrum Master, Business Analyst, Développeur Fullstack, Digital Marketer.</li>
+<li><strong>Métiers industriels</strong></li>
+<li><strong>Métiers de l'environnement</strong></li>
+<li><strong>Métiers de la santé</strong></li>
+<li><em>(liste de catégories à compléter selon la nomenclature retenue)</em></li>
+</ul>
+</li>
+<li>Chaque catégorie dépliée affiche la liste de ses métiers ; un tap sur un métier ouvre sa fiche détaillée (2.4).</li>
+</ul>
+<p><strong>Interactions</strong> : une seule catégorie ouverte à la fois ou ouverture multiple (à trancher en conception) ; chevron indiquant l'état déplié/replié.</p>
+<hr>
+<h3>2.4 Fiche métier (détail)</h3>
+<p><strong>Objectif</strong> : présenter un métier en détail pour aider à la décision d'orientation.</p>
+<p><strong>Contenu, dans l'ordre</strong> :</p>
+<ol>
+<li>En-tête : nom du métier, catégorie de rattachement, icône.</li>
+<li><strong>Ce que fait ce métier</strong> : description courte du rôle.</li>
+<li><strong>Formations associées</strong> : liste des formations menant à ce métier.</li>
+<li><strong>Compétences techniques requises</strong> : présentées sous forme de chips.</li>
+<li><strong>Entreprises qui recrutent</strong> : entreprises associées à ce métier, sous forme de chips.</li>
+<li>Action : bouton <strong>Voir les offres liées</strong>.</li>
+</ol>
+<blockquote>
+<p>Évolution actée : les statistiques « nombre d'offres actives » et « tendance » précédemment affichées sur cette fiche sont retirées de la fiche détail (elles restent visibles au niveau du classement dans le tableau de bord).</p>
+</blockquote>
+<hr>
+<h3>2.5 Orientation — Conversation avec l'assistant</h3>
+<p><strong>Objectif</strong> : engager un dialogue guidé (assistant IA) avec un utilisateur qui ne sait pas encore quelle voie choisir après le baccalauréat, afin de cerner son profil.</p>
+<p><strong>Contenu</strong> :</p>
+<ul>
+<li>Interface de chat entre l'utilisateur et l'assistant d'orientation.</li>
+<li>L'assistant pose des questions successives pour identifier : la série du baccalauréat obtenue, les centres d'intérêt (scientifique, commercial, créatif, etc.), le mode de travail préféré (autonome/technique vs. équipe/projets concrets), et d'autres critères pertinents (contraintes géographiques, budget de formation, etc. — à définir).</li>
+<li>Champ de saisie libre pour la réponse de l'utilisateur.</li>
+</ul>
+<p><strong>Sortie attendue</strong> : un profil structuré (série du bac, centres d'intérêt, préférences) transmis à l'écran de recommandation (2.6).</p>
+<hr>
+<h3>2.6 Orientation — Recommandation de parcours</h3>
+<p><strong>Objectif</strong> : recommander des parcours de formation concrets à partir de l'analyse du profil (issu de 2.5) et du métier choisi (issu de 2.3/2.4).</p>
+<p><strong>Contenu</strong> :</p>
+<ul>
+<li>Rappel du profil (série du bac) et du métier visé.</li>
+<li><strong>Parcours recommandés au Congo</strong> : établissement, intitulé de la formation, taux de compatibilité avec le profil.</li>
+<li><strong>Parcours à l'international</strong> : établissement, ville/pays, taux de compatibilité.</li>
+<li>Classement par pertinence décroissante (score de compatibilité en %).</li>
+</ul>
+<p><strong>Logique métier à spécifier</strong> : algorithme ou règles de scoring associant profil + métier → parcours (critères de pondération à définir avec l'équipe pédagogique/produit).</p>
+<hr>
+<h3>2.7 Établissements</h3>
+<p><strong>Objectif</strong> : permettre la recherche d'établissements de formation selon des critères précis.</p>
+<p><strong>Filtres</strong> (en haut de l'écran) :</p>
+<ul>
+<li>Série du baccalauréat</li>
+<li>Filière de formation</li>
+<li>Métier visé</li>
+</ul>
+<p><strong>Contenu</strong> : liste des établissements correspondant aux filtres sélectionnés, avec pour chacun : nom, ville, intitulé de la formation proposée. Accès à une fiche établissement détaillée (hors périmètre des maquettes actuelles — à spécifier si nécessaire : coordonnées, frais, modalités d'admission, etc.).</p>
+<hr>
+<h3>2.8 Annales — Liste des concours</h3>
+<p><strong>Objectif</strong> : aider à la préparation des concours d'entrée par filière.</p>
+<p><strong>Filtres</strong> (en haut de l'écran) :</p>
+<ul>
+<li>Série du baccalauréat</li>
+<li>Filière de formation</li>
+</ul>
+<p><strong>Contenu</strong> : liste des concours correspondant aux filtres, avec le nom du concours et l'établissement/organisme organisateur.</p>
+<hr>
+<h3>2.9 Annales — Détail d'un concours</h3>
+<p><strong>Objectif</strong> : donner accès aux sujets d'annales pour un concours sélectionné.</p>
+<p><strong>Contenu</strong> : pour le concours sélectionné, liste des épreuves disponibles (intitulé, année, contenu — sujet seul ou sujet + corrigé, format PDF).</p>
+<p><strong>Actions par épreuve et globalement</strong> :</p>
+<ul>
+<li><strong>Aperçu</strong> : visualisation du document sans téléchargement.</li>
+<li><strong>Télécharger</strong> : récupération du fichier PDF.</li>
+</ul>
+<hr>
+<h2>3. Exigences transverses</h2>
+<h3>3.1 Langue</h3>
+<p>Interface et contenus intégralement en français.</p>
+<h3>3.2 Données</h3>
+<ul>
+<li>Les écrans livrés à ce stade utilisent des <strong>données de démonstration</strong>. Les sources définitives (statistiques du marché de l'emploi, référentiel des établissements, banque d'annales) restent à identifier et à contractualiser (organismes publics, partenaires, saisie manuelle).</li>
+<li>Prévoir un mécanisme de mise à jour périodique des données du tableau de bord (fréquence à définir).</li>
+</ul>
+<h3>3.3 Performance et disponibilité</h3>
+<ul>
+<li>Chargement du tableau de bord et de ses filtres sans latence perceptible sur connexion mobile standard au Congo (prévoir un mode dégradé / mise en cache pour connexions lentes).</li>
+<li>Téléchargement des annales optimisé pour des fichiers PDF de taille raisonnable.</li>
+</ul>
+<h3>3.4 Accessibilité et ergonomie</h3>
+<ul>
+<li>Contrastes suffisants entre texte et fond (cf. charte graphique, §4).</li>
+<li>Cibles tactiles (boutons, chips) dimensionnées pour un usage mobile à une main.</li>
+<li>Filtres et paramètres toujours accessibles en un tap depuis les écrans concernés.</li>
+</ul>
+<h3>3.5 Confidentialité des données utilisateur</h3>
+<ul>
+<li>Les échanges avec l'assistant d'orientation (écran 2.5) peuvent contenir des informations personnelles (résultats scolaires, préférences) : définir une politique de conservation et de confidentialité de ces échanges.</li>
+</ul>
+<hr>
+<h2>4. Charte graphique</h2>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Thème</td>
+<td>Fond foncé « encre », inspiré d'une carte de navigation (référence au nom LogPose)</td>
+</tr>
+<tr>
+<td>Couleur de fond principale</td>
+<td><code>#0D211D</code></td>
+</tr>
+<tr>
+<td>Surfaces / cartes</td>
+<td><code>#132E28</code>, <code>#193B33</code></td>
+</tr>
+<tr>
+<td>Lignes de séparation</td>
+<td><code>#2B4B42</code></td>
+</tr>
+<tr>
+<td>Couleur d'accent principale (or)</td>
+<td><code>#CB9345</code></td>
+</tr>
+<tr>
+<td>Couleur d'accent secondaire (rouille)</td>
+<td><code>#C15C42</code></td>
+</tr>
+<tr>
+<td>Texte principal</td>
+<td><code>#F3EFE1</code></td>
+</tr>
+<tr>
+<td>Texte secondaire / atténué</td>
+<td><code>#9FC0B6</code>, <code>#C9C2A9</code></td>
+</tr>
+<tr>
+<td>Typographie des titres</td>
+<td>Fraunces (serif)</td>
+</tr>
+<tr>
+<td>Typographie du contenu et des données</td>
+<td>Space Grotesk (sans-serif)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5. Arborescence de navigation (synthèse)</h2>
+<pre><code>Tableau de bord (accueil)
+ ├── Filtres (zone, secteur, entreprise, type d&#39;emploi)
+ └── Top métiers → Fiche métier (détail)
+
+Catalogue des métiers (par catégorie)
+ └── Fiche métier (détail)
+      └── Voir les offres liées
+
+Orientation
+ ├── Conversation avec l&#39;assistant
+ └── Recommandation de parcours (Congo / international)
+      └── Établissements (filtrés : série bac, filière, métier)
+
+Annales
+ ├── Liste des concours (filtrée : série bac, filière)
+ └── Détail d&#39;un concours (aperçu / téléchargement des épreuves)
+</code></pre>
+<hr>
+<h2>6. Livrables associés à ce cahier des charges</h2>
+<ul>
+<li>Maquettes visuelles des 9 écrans (fichiers image, thème LogPose).</li>
+<li>Version interactive HTML du tableau de bord (filtres fonctionnels à titre de démonstration).</li>
+</ul>
+<h2>7. Hors périmètre à ce stade (pistes v2)</h2>
+<ul>
+<li>Fiche établissement détaillée (au-delà de la liste filtrée).</li>
+<li>Historique et suivi de progression de l'utilisateur (favoris, candidatures).</li>
+<li>Notifications (nouvelles offres, nouveaux concours).</li>
+<li>Volet secondaire pour les établissements/entreprises partenaires (gestion de leur fiche).</li>
+</ul>
+<hr>
+<p><em>Document de travail — à faire évoluer au fil des itérations produit.</em></p>
+
+</body></html>
