@@ -57,3 +57,13 @@ Les sessions sont maintenant persistées dans MySQL avec les seuls choix du ques
 Le web et l’API sont implémentés sans framework dans `backend/`. La vue PHP `views/home.php` charge une charte CSS, JavaScript vanilla et la bibliothèque locale Lucide pour les pictogrammes ; le même point d’entrée distribue les routes REST. PDO est utilisé avec émulation des requêtes préparées désactivée, un routeur explicite et un schéma relationnel versionné dans `backend/database/schema.sql`. Les données de démonstration sont séparées dans `backend/database/seed.sql`.
 
 Les identifiants de base restent exclusivement dans `backend/.env` (ignoré par Git), avec un modèle fourni dans `backend/.env.example`. Le web PHP et les routes `/api` sont servis par le même domaine ; aucune couche de proxy, Node.js ou build front-end n’est nécessaire.
+
+## Application mobile React Native / Expo
+
+L’application mobile native est isolée dans `mobile/` afin de préserver le déploiement PHP/MySQL autonome du web. Elle cible Android et iOS par Expo SDK 52 et reprend les mêmes domaines fonctionnels : tableau de bord, catalogue et fiches métiers, orientation à questions dépendantes, établissements, concours et annales.
+
+Son client TypeScript consomme les contrats REST existants à partir de `EXPO_PUBLIC_API_BASE_URL`. Cette valeur doit être une origine HTTPS publique (par exemple `https://logpose.example.cg`), sans `/api` final et sans `localhost` : un appareil mobile ne peut pas joindre le serveur local de développement via son propre `localhost`. Les routes API déclarent déjà les en-têtes CORS nécessaires pour `GET`, `POST` et les prévols `OPTIONS`.
+
+Le préfixe Expo `EXPO_PUBLIC_` rend la valeur lisible dans le bundle ; il est réservé à cette URL publique et ne doit jamais contenir de secret. La configuration personnelle est dans `mobile/.env`, ignorée par Git, et son modèle est `mobile/.env.example`.
+
+Les icônes mobiles viennent de `lucide-react-native` (avec `react-native-svg`) et les noms d’icônes sont fournis par cette bibliothèque ; aucun emoji ni dessin SVG artisanal n’est utilisé. Les dépendances Node.js concernent uniquement le build et le lancement Expo de `mobile/`, non le runtime du web PHP.
