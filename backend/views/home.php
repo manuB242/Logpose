@@ -20,6 +20,7 @@ declare(strict_types=1);
       <p>Activez JavaScript pour consulter le tableau de bord, explorer les métiers et suivre le parcours d’orientation.</p>
     </main>
   </noscript>
+  <script src="/assets/vendor/lucide.min.js" defer></script>
   <script src="/assets/app.js" defer></script>
 </body>
 </html>

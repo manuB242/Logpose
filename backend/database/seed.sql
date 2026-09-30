@@ -17,11 +17,11 @@ INSERT INTO baccalaureate_series (code, name, sort_order) VALUES
 ON DUPLICATE KEY UPDATE name = VALUES(name), sort_order = VALUES(sort_order);
 
 INSERT INTO job_categories (slug, name, description, symbol, sort_order) VALUES
-  ('numerique', 'Métiers du numérique', 'Concevoir, analyser et faire grandir les services numériques.', '⌘', 1),
-  ('btp', 'Métiers du bâtiment', 'Construire, planifier et sécuriser les ouvrages.', '⌁', 2),
-  ('sante', 'Métiers de la santé', 'Prévenir, soigner et accompagner les patients.', '✚', 3),
-  ('environnement', 'Métiers de l''environnement', 'Préserver les ressources et agir sur le terrain.', '◌', 4),
-  ('finance', 'Métiers de la gestion', 'Conseiller, organiser et piloter les activités.', '↗', 5)
+  ('numerique', 'Métiers du numérique', 'Concevoir, analyser et faire grandir les services numériques.', 'code-2', 1),
+  ('btp', 'Métiers du bâtiment', 'Construire, planifier et sécuriser les ouvrages.', 'hard-hat', 2),
+  ('sante', 'Métiers de la santé', 'Prévenir, soigner et accompagner les patients.', 'heart-pulse', 3),
+  ('environnement', 'Métiers de l''environnement', 'Préserver les ressources et agir sur le terrain.', 'leaf', 4),
+  ('finance', 'Métiers de la gestion', 'Conseiller, organiser et piloter les activités.', 'chart-line', 5)
 ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description), symbol = VALUES(symbol), sort_order = VALUES(sort_order);
 
 INSERT INTO companies (name, sector_id) VALUES

@@ -54,6 +54,6 @@ Les sessions sont maintenant persistées dans MySQL avec les seuls choix du ques
 
 ## Application web PHP + MySQL
 
-Le web et l’API sont implémentés sans framework dans `backend/`. La vue PHP `views/home.php` charge une charte CSS et un JavaScript vanilla ; le même point d’entrée distribue les routes REST. PDO est utilisé avec émulation des requêtes préparées désactivée, un routeur explicite et un schéma relationnel versionné dans `backend/database/schema.sql`. Les données de démonstration sont séparées dans `backend/database/seed.sql`.
+Le web et l’API sont implémentés sans framework dans `backend/`. La vue PHP `views/home.php` charge une charte CSS, JavaScript vanilla et la bibliothèque locale Lucide pour les pictogrammes ; le même point d’entrée distribue les routes REST. PDO est utilisé avec émulation des requêtes préparées désactivée, un routeur explicite et un schéma relationnel versionné dans `backend/database/schema.sql`. Les données de démonstration sont séparées dans `backend/database/seed.sql`.
 
 Les identifiants de base restent exclusivement dans `backend/.env` (ignoré par Git), avec un modèle fourni dans `backend/.env.example`. Le web PHP et les routes `/api` sont servis par le même domaine ; aucune couche de proxy, Node.js ou build front-end n’est nécessaire.

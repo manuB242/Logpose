@@ -40,6 +40,10 @@ Le site et l’API sont servis depuis le même domaine. Le navigateur appelle un
 
 Aucun package Composer, framework PHP, Node.js, React ou Vite n’est nécessaire.
 
+## Icônes
+
+Les pictogrammes proviennent de la bibliothèque [Lucide](https://lucide.dev/) **v0.468.0**, distribuée localement dans `backend/public/assets/vendor/lucide.min.js` sous licence ISC. Aucun emoji ni pictogramme dessiné à la main n’est utilisé par l’interface.
+
 ## Initialiser la base de données
 
 1. Créer le schéma avec un compte MySQL administrateur :
