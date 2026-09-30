@@ -1,0 +1,53 @@
+# LogPose
+
+MVP de l'application d'orientation scolaire et professionnelle pour la République du Congo.
+
+## Première livraison
+
+Cette première itération couvre le **lot 1** du cahier des charges :
+
+- tableau de bord du marché de l'emploi ;
+- filtres par zone, secteur, entreprise et type d'emploi ;
+- API REST locale avec données de démonstration clairement identifiées ;
+- interface responsive pensée d'abord pour les usages mobiles.
+
+> Les indicateurs actuellement affichés sont des données fictives de démonstration. Ils ne constituent pas des statistiques officielles sur l'emploi au Congo.
+
+## Pré-requis
+
+- Node.js 22 ou supérieur
+- npm 10 ou supérieur
+
+## Démarrage
+
+```bash
+npm install
+npm run dev
+```
+
+L'interface est exposée par Vite (généralement sur `http://localhost:5173`) et l'API est lancée sur le port `8787`.
+
+## Vérification de production
+
+```bash
+npm run build
+```
+
+## Architecture actuelle
+
+```text
+apps/
+├── api/       # API REST Node.js, sans dépendance serveur externe
+└── web/       # Interface React + TypeScript + Vite
+```
+
+Le navigateur appelle uniquement des URL relatives sous `/api`. En développement, Vite les transmet à l'API ; cette convention reste compatible avec un déploiement derrière un même domaine.
+
+## Suite prévue
+
+1. Valider les sources de données, leur date de mise à jour et leur méthode de calcul.
+2. Ajouter le catalogue de métiers et les fiches métiers.
+3. Intégrer établissements, concours et annales.
+4. Mettre en place l'orientation guidée à partir de règles de compatibilité explicites, avant toute couche conversationnelle IA.
+
+Les documents initiaux du projet sont conservés à la racine du dépôt.
