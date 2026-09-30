@@ -27,6 +27,11 @@ export type Dashboard = {
   totalRows: number;
 };
 
+export type DemoMetadata = {
+  dataStatus: 'demonstration';
+  source: string;
+};
+
 export type JobCategory = {
   id: string;
   name: string;
@@ -60,10 +65,79 @@ export type JobDetail = JobSummary & {
 };
 
 export type Catalog = {
-  metadata: {
-    dataStatus: 'demonstration';
-    source: string;
-  };
+  metadata: DemoMetadata;
   categories: JobCategory[];
   items: JobSummary[];
+};
+
+export type EducationOptions = {
+  series: string[];
+  fields: string[];
+  jobs: string[];
+};
+
+export type EducationFilters = {
+  series: string;
+  field: string;
+  job: string;
+};
+
+export type EstablishmentProgram = {
+  id: string;
+  establishmentId: string;
+  establishment: string;
+  city: string;
+  country: string;
+  field: string;
+  program: string;
+  duration: string;
+  series: string[];
+  jobs: string[];
+};
+
+export type EstablishmentResults = {
+  metadata: DemoMetadata;
+  appliedFilters: { series: string[]; fields: string[]; jobs: string[] };
+  items: EstablishmentProgram[];
+};
+
+export type ContestOptions = {
+  series: string[];
+  fields: string[];
+};
+
+export type ContestFilters = {
+  series: string;
+  field: string;
+};
+
+export type Contest = {
+  id: string;
+  name: string;
+  organizer: string;
+  city: string;
+  field: string;
+  series: string[];
+  description: string;
+  paperCount: number;
+};
+
+export type ContestResults = {
+  metadata: DemoMetadata;
+  appliedFilters: { series: string[]; fields: string[] };
+  items: Contest[];
+};
+
+export type Paper = {
+  id: string;
+  label: string;
+  year: number;
+  type: string;
+  pages: number;
+};
+
+export type ContestPapers = {
+  metadata: DemoMetadata;
+  contest: Contest;
+  papers: Paper[];
 };

@@ -1,9 +1,15 @@
-import type { Catalog, Dashboard, FilterOptions, Filters, JobDetail } from './types';
+import type { Catalog, ContestFilters, ContestOptions, ContestPapers, ContestResults, Dashboard, EducationFilters, EducationOptions, EstablishmentResults, FilterOptions, Filters, JobDetail } from './types';
 
 async function request<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) throw new Error('La connexion au service LogPose a échoué.');
   return response.json() as Promise<T>;
+}
+
+function selectedParams(values: Record<string, string>) {
+  const params = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => { if (value) params.set(key, value); });
+  return params.toString();
 }
 
 export function getFilterOptions() {
@@ -25,4 +31,26 @@ export function getCatalog() {
 
 export function getJob(id: string) {
   return request<{ metadata: Catalog['metadata']; item: JobDetail }>(`/api/metiers/${encodeURIComponent(id)}`);
+}
+
+export function getEducationOptions() {
+  return request<EducationOptions>('/api/etablissements/options');
+}
+
+export function getEstablishments(filters: EducationFilters) {
+  const query = selectedParams({ series: filters.series, fields: filters.field, jobs: filters.job });
+  return request<EstablishmentResults>(`/api/etablissements${query ? `?${query}` : ''}`);
+}
+
+export function getContestOptions() {
+  return request<ContestOptions>('/api/concours/options');
+}
+
+export function getContests(filters: ContestFilters) {
+  const query = selectedParams({ series: filters.series, fields: filters.field });
+  return request<ContestResults>(`/api/concours${query ? `?${query}` : ''}`);
+}
+
+export function getContestPapers(id: string) {
+  return request<ContestPapers>(`/api/concours/${encodeURIComponent(id)}/annales`);
 }

@@ -245,6 +245,85 @@ const jobs = [
   }
 ];
 
+const establishments = [
+  {
+    id: 'institut-horizon', name: 'Institut Horizon', city: 'Brazzaville', country: 'République du Congo',
+    programs: [
+      { id: 'dev-web', field: 'Informatique', name: 'Développement logiciel', duration: '3 ans', series: ['Série C', 'Série D'], jobs: ['Développeur Fullstack', 'Data Analyst'] },
+      { id: 'data', field: 'Informatique', name: 'Analyse de données', duration: '3 ans', series: ['Série C', 'Série D'], jobs: ['Data Analyst'] }
+    ]
+  },
+  {
+    id: 'campus-avenir', name: 'Campus Avenir', city: 'Pointe-Noire', country: 'République du Congo',
+    programs: [
+      { id: 'marketing', field: 'Marketing & communication', name: 'Marketing digital', duration: '2 ans', series: ['Série A', 'Série C', 'Série D'], jobs: ['Digital Marketer', 'Product Manager', 'Agent commercial'] },
+      { id: 'logistique', field: 'Gestion & commerce', name: 'Logistique et transport', duration: '2 ans', series: ['Série C', 'Série D', 'Série G2'], jobs: ['Responsable logistique'] }
+    ]
+  },
+  {
+    id: 'ecole-sante-services', name: 'École Santé & Services', city: 'Brazzaville', country: 'République du Congo',
+    programs: [
+      { id: 'infirmier', field: 'Santé', name: 'Soins infirmiers', duration: '3 ans', series: ['Série C', 'Série D'], jobs: ['Infirmier diplômé d’État', 'Aide-soignant'] },
+      { id: 'laboratoire', field: 'Santé', name: 'Analyses biomédicales', duration: '3 ans', series: ['Série C', 'Série D'], jobs: ['Laborantin'] }
+    ]
+  },
+  {
+    id: 'academie-batir', name: 'Académie Bâtir', city: 'Pointe-Noire', country: 'République du Congo',
+    programs: [
+      { id: 'genie-civil', field: 'BTP', name: 'Génie civil', duration: '3 ans', series: ['Série C', 'Série D'], jobs: ['Chef de chantier', 'Conducteur de travaux'] },
+      { id: 'maintenance', field: 'BTP', name: 'Maintenance électromécanique', duration: '2 ans', series: ['Série C', 'Série D'], jobs: ['Technicien électricien', 'Mécanicien industriel'] }
+    ]
+  },
+  {
+    id: 'institut-vert', name: 'Institut Vert', city: 'Dolisie', country: 'République du Congo',
+    programs: [
+      { id: 'environnement', field: 'Environnement', name: 'Gestion environnementale', duration: '3 ans', series: ['Série C', 'Série D'], jobs: ['Technicien environnement', 'Animateur agricole'] }
+    ]
+  },
+  {
+    id: 'centre-gestion-plus', name: 'Centre Gestion Plus', city: 'Brazzaville', country: 'République du Congo',
+    programs: [
+      { id: 'banque', field: 'Gestion & commerce', name: 'Banque, finance et assurance', duration: '2 ans', series: ['Série C', 'Série D', 'Série G2'], jobs: ['Conseiller clientèle', 'Assistant comptable'] }
+    ]
+  }
+];
+
+const contests = [
+  {
+    id: 'concours-informatique', name: "Concours d'entrée — Informatique", organizer: 'Institut Horizon', city: 'Brazzaville', field: 'Informatique', series: ['Série C', 'Série D'],
+    description: 'Sélection pour les parcours de développement logiciel et d’analyse de données.',
+    papers: [
+      { id: 'annale-info-2025-math', label: 'Mathématiques', year: 2025, type: 'Sujet', pages: 3 },
+      { id: 'annale-info-2025-logique', label: 'Logique et raisonnement', year: 2025, type: 'Sujet + corrigé', pages: 4 },
+      { id: 'annale-info-2024-math', label: 'Mathématiques', year: 2024, type: 'Sujet', pages: 3 }
+    ]
+  },
+  {
+    id: 'concours-sante', name: "Concours d'entrée — Soins infirmiers", organizer: 'École Santé & Services', city: 'Brazzaville', field: 'Santé', series: ['Série C', 'Série D'],
+    description: 'Sélection indicative pour les parcours de soins infirmiers et d’analyses biomédicales.',
+    papers: [
+      { id: 'annale-sante-2025-bio', label: 'Biologie', year: 2025, type: 'Sujet', pages: 4 },
+      { id: 'annale-sante-2024-chimie', label: 'Chimie', year: 2024, type: 'Sujet + corrigé', pages: 4 }
+    ]
+  },
+  {
+    id: 'concours-btp', name: "Concours d'entrée — Génie civil", organizer: 'Académie Bâtir', city: 'Pointe-Noire', field: 'BTP', series: ['Série C', 'Série D'],
+    description: 'Sélection indicative pour les parcours de génie civil et de maintenance.',
+    papers: [
+      { id: 'annale-btp-2025-math', label: 'Mathématiques appliquées', year: 2025, type: 'Sujet', pages: 3 },
+      { id: 'annale-btp-2024-tech', label: 'Techniques du bâtiment', year: 2024, type: 'Sujet', pages: 5 }
+    ]
+  },
+  {
+    id: 'concours-gestion', name: "Concours d'entrée — Banque & gestion", organizer: 'Centre Gestion Plus', city: 'Brazzaville', field: 'Gestion & commerce', series: ['Série C', 'Série D', 'Série G2'],
+    description: 'Sélection indicative pour les parcours de banque, finance et assurance.',
+    papers: [
+      { id: 'annale-gestion-2025-culture', label: 'Culture générale', year: 2025, type: 'Sujet', pages: 3 },
+      { id: 'annale-gestion-2024-compta', label: 'Comptabilité', year: 2024, type: 'Sujet + corrigé', pages: 4 }
+    ]
+  }
+];
+
 const unique = (values) => [...new Set(values)].sort((a, b) => a.localeCompare(b, 'fr'));
 const parseList = (value) => (value ? value.split(',').filter(Boolean) : []);
 const inFilter = (value, selected) => selected.length === 0 || selected.includes(value);
@@ -290,6 +369,84 @@ function getCatalog(searchParams) {
       jobCount: jobs.filter((job) => job.categoryId === category.id).length
     })),
     items
+  };
+}
+
+function getEducationOptions() {
+  const programs = establishments.flatMap((establishment) => establishment.programs);
+  return {
+    series: unique(programs.flatMap((program) => program.series)),
+    fields: unique(programs.map((program) => program.field)),
+    jobs: unique(programs.flatMap((program) => program.jobs))
+  };
+}
+
+function getEstablishments(searchParams) {
+  const series = parseList(searchParams.get('series'));
+  const fields = parseList(searchParams.get('fields'));
+  const jobsFilter = parseList(searchParams.get('jobs'));
+  const items = establishments.flatMap((establishment) => establishment.programs.map((program) => ({
+    id: `${establishment.id}-${program.id}`,
+    establishmentId: establishment.id,
+    establishment: establishment.name,
+    city: establishment.city,
+    country: establishment.country,
+    field: program.field,
+    program: program.name,
+    duration: program.duration,
+    series: program.series,
+    jobs: program.jobs
+  }))).filter((item) =>
+    (series.length === 0 || item.series.some((value) => series.includes(value))) &&
+    (fields.length === 0 || fields.includes(item.field)) &&
+    (jobsFilter.length === 0 || item.jobs.some((value) => jobsFilter.includes(value)))
+  );
+  return {
+    metadata: { dataStatus: 'demonstration', source: 'Référentiel établissements fictif LogPose — données à contractualiser.' },
+    appliedFilters: { series, fields, jobs: jobsFilter },
+    items
+  };
+}
+
+function getContestOptions() {
+  return {
+    series: unique(contests.flatMap((contest) => contest.series)),
+    fields: unique(contests.map((contest) => contest.field))
+  };
+}
+
+function contestSummary(contest) {
+  return {
+    id: contest.id,
+    name: contest.name,
+    organizer: contest.organizer,
+    city: contest.city,
+    field: contest.field,
+    series: contest.series,
+    description: contest.description,
+    paperCount: contest.papers.length
+  };
+}
+
+function getContests(searchParams) {
+  const series = parseList(searchParams.get('series'));
+  const fields = parseList(searchParams.get('fields'));
+  return {
+    metadata: { dataStatus: 'demonstration', source: 'Référentiel concours fictif LogPose — dates et pièces à confirmer.' },
+    appliedFilters: { series, fields },
+    items: contests
+      .filter((contest) => (series.length === 0 || contest.series.some((value) => series.includes(value))) && (fields.length === 0 || fields.includes(contest.field)))
+      .map(contestSummary)
+  };
+}
+
+function getContestPapers(id) {
+  const contest = contests.find((item) => item.id === id);
+  if (!contest) return null;
+  return {
+    metadata: { dataStatus: 'demonstration', source: 'Référentiel annales fictif LogPose — aucun fichier source n’est encore publié.' },
+    contest: contestSummary(contest),
+    papers: contest.papers
   };
 }
 
@@ -383,6 +540,36 @@ function requestHandler(req, res) {
     return sendJson(res, 200, {
       metadata: { dataStatus: 'demonstration', source: 'Référentiel métiers fictif LogPose.' },
       item: { ...jobSummary(job), mission: job.mission, skills: job.skills, trainings: job.trainings, companies: job.companies }
+    });
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/etablissements/options') {
+    return sendJson(res, 200, getEducationOptions());
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/etablissements') {
+    return sendJson(res, 200, getEstablishments(url.searchParams));
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/concours/options') {
+    return sendJson(res, 200, getContestOptions());
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/concours') {
+    return sendJson(res, 200, getContests(url.searchParams));
+  }
+
+  const contestPapersMatch = url.pathname.match(/^\/api\/concours\/([^/]+)\/annales$/);
+  if (req.method === 'GET' && contestPapersMatch) {
+    const payload = getContestPapers(decodeURIComponent(contestPapersMatch[1]));
+    return payload ? sendJson(res, 200, payload) : sendJson(res, 404, { error: 'Concours introuvable.' });
+  }
+
+  const paperDownloadMatch = url.pathname.match(/^\/api\/annales\/([^/]+)\/telechargement$/);
+  if (req.method === 'GET' && paperDownloadMatch) {
+    return sendJson(res, 409, {
+      error: 'Aucun fichier n’est disponible pour cette référence de démonstration.',
+      code: 'DEMO_FILE_UNAVAILABLE'
     });
   }
 

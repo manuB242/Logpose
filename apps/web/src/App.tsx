@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getCatalog, getDashboard, getFilterOptions, getJob } from './api';
-import type { Catalog, Dashboard, FilterOptions, Filters, JobCategory, JobDetail, JobSummary } from './types';
+import { getCatalog, getContestOptions, getContestPapers, getContests, getDashboard, getEducationOptions, getEstablishments, getFilterOptions, getJob } from './api';
+import type { Catalog, ContestFilters, ContestOptions, ContestPapers, ContestResults, Dashboard, EducationFilters, EducationOptions, EstablishmentResults, FilterOptions, Filters, JobCategory, JobDetail, JobSummary } from './types';
 
 const EMPTY_FILTERS: Filters = { zones: [], sectors: [], companies: [], employmentTypes: [] };
 const SECTOR_COLORS = ['#cb9345', '#c15c42', '#89b6a8', '#6f9889', '#d5c08f', '#8c8d74'];
 const formatter = new Intl.NumberFormat('fr-FR');
 
-type View = 'dashboard' | 'catalogue' | 'job';
+type View = 'dashboard' | 'catalogue' | 'job' | 'establishments' | 'contests' | 'contest';
 type IconName = 'grid' | 'compass' | 'school' | 'file' | 'sliders' | 'arrow-up' | 'briefcase' | 'chevron' | 'close' | 'refresh' | 'sparkle' | 'info' | 'search' | 'arrow-left' | 'layers' | 'target';
 
 function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
@@ -194,6 +194,78 @@ function JobPage({ job, loading, error, onBack, onOpenOffers }: { job: JobDetail
   </section>;
 }
 
+function SelectField({ label, value, values, onChange }: { label: string; value: string; values: string[]; onChange: (value: string) => void }) {
+  return <label className="select-field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">Tous</option>{values.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>;
+}
+
+function EstablishmentsPage({ onNotice }: { onNotice: (message: string) => void }) {
+  const [filters, setFilters] = useState<EducationFilters>({ series: '', field: '', job: '' });
+  const [options, setOptions] = useState<EducationOptions | null>(null);
+  const [results, setResults] = useState<EstablishmentResults | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => { getEducationOptions().then(setOptions).catch((requestError: Error) => setError(requestError.message)); }, []);
+  useEffect(() => {
+    setLoading(true); setError(null);
+    getEstablishments(filters).then(setResults).catch((requestError: Error) => setError(requestError.message)).finally(() => setLoading(false));
+  }, [filters]);
+  const setFilter = (key: keyof EducationFilters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
+
+  return <section className="directory-page">
+    <header className="directory-hero"><div><p className="eyebrow">Parcours de formation</p><h1>Trouver le bon<br /><em>point de départ.</em></h1><p>Recherchez des parcours selon votre série du baccalauréat, la filière envisagée ou le métier qui vous attire.</p></div><div className="directory-hero__shape"><Icon name="school" size={42} /><span>↗</span></div></header>
+    <section className="directory-filters" aria-label="Filtres des établissements"><div className="directory-filters__top"><div><p className="eyebrow">Affiner la recherche</p><h2>Établissements et formations</h2></div><button className="text-button" onClick={() => setFilters({ series: '', field: '', job: '' })}>Réinitialiser</button></div><div className="select-grid"><SelectField label="Série du baccalauréat" value={filters.series} values={options?.series || []} onChange={(value) => setFilter('series', value)} /><SelectField label="Filière de formation" value={filters.field} values={options?.fields || []} onChange={(value) => setFilter('field', value)} /><SelectField label="Métier visé" value={filters.job} values={options?.jobs || []} onChange={(value) => setFilter('job', value)} /></div></section>
+    <div className="directory-result-label"><span><Icon name="school" size={15} /> Référentiel de démonstration</span><span>{results?.items.length || 0} parcours trouvé{(results?.items.length || 0) !== 1 ? 's' : ''}</span></div>
+    {loading ? <LoadingState label="Recherche des formations…" /> : error ? <section className="error-card"><Icon name="info" /><div><strong>Impossible de charger les établissements.</strong><span>{error}</span></div><button onClick={() => setFilters({ ...filters })}><Icon name="refresh" size={17} /> Réessayer</button></section> : !results?.items.length ? <DirectoryEmpty label="Aucun parcours ne correspond à ces filtres." /> : <div className="establishment-list">{results.items.map((item) => <article className="establishment-card" key={item.id}><div className="establishment-card__badge">{item.establishment.slice(0, 2).toUpperCase()}</div><div className="establishment-card__content"><div className="establishment-card__title"><div><p>{item.field}</p><h3>{item.establishment}</h3></div><span>{item.city}</span></div><strong>{item.program}</strong><div className="establishment-card__meta"><span>{item.duration}</span><i /> <span>{item.series.join(' · ')}</span></div><div className="job-pill-list">{item.jobs.map((job) => <span key={job}>{job}</span>)}</div></div><button className="outline-button" onClick={() => onNotice('La fiche établissement complète sera ajoutée dans une prochaine itération.')}>Voir le parcours <Icon name="chevron" size={16} /></button></article>)}</div>}
+    <footer className="data-footer directory-footer"><Icon name="info" size={16} /><span><strong>Données de démonstration.</strong> Les formations, conditions d’admission, frais et coordonnées doivent être vérifiés directement auprès de chaque établissement.</span></footer>
+  </section>;
+}
+
+function DirectoryEmpty({ label }: { label: string }) {
+  return <div className="catalogue-empty directory-empty"><Icon name="search" size={25} /><strong>Aucun résultat</strong><span>{label}</span></div>;
+}
+
+function ContestsPage({ onOpenContest }: { onOpenContest: (id: string) => void }) {
+  const [filters, setFilters] = useState<ContestFilters>({ series: '', field: '' });
+  const [options, setOptions] = useState<ContestOptions | null>(null);
+  const [results, setResults] = useState<ContestResults | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => { getContestOptions().then(setOptions).catch((requestError: Error) => setError(requestError.message)); }, []);
+  useEffect(() => { setLoading(true); setError(null); getContests(filters).then(setResults).catch((requestError: Error) => setError(requestError.message)).finally(() => setLoading(false)); }, [filters]);
+  const setFilter = (key: keyof ContestFilters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
+
+  return <section className="directory-page contests-page">
+    <header className="directory-hero contest-hero"><div><p className="eyebrow">Préparer sa candidature</p><h1>Les concours,<br /><em>sans détour.</em></h1><p>Filtrez les concours par série et filière, puis retrouvez les références d'annales disponibles.</p></div><div className="directory-hero__shape"><Icon name="file" size={42} /><span>⌁</span></div></header>
+    <section className="directory-filters contest-filters" aria-label="Filtres des concours"><div className="directory-filters__top"><div><p className="eyebrow">Votre recherche</p><h2>Concours et annales</h2></div><button className="text-button" onClick={() => setFilters({ series: '', field: '' })}>Réinitialiser</button></div><div className="select-grid select-grid--two"><SelectField label="Série du baccalauréat" value={filters.series} values={options?.series || []} onChange={(value) => setFilter('series', value)} /><SelectField label="Filière de formation" value={filters.field} values={options?.fields || []} onChange={(value) => setFilter('field', value)} /></div></section>
+    <div className="directory-result-label"><span><Icon name="file" size={15} /> Référentiel de démonstration</span><span>{results?.items.length || 0} concours trouvé{(results?.items.length || 0) !== 1 ? 's' : ''}</span></div>
+    {loading ? <LoadingState label="Recherche des concours…" /> : error ? <section className="error-card"><Icon name="info" /><div><strong>Impossible de charger les concours.</strong><span>{error}</span></div><button onClick={() => setFilters({ ...filters })}><Icon name="refresh" size={17} /> Réessayer</button></section> : !results?.items.length ? <DirectoryEmpty label="Aucun concours ne correspond à ces filtres." /> : <div className="contest-list">{results.items.map((contest) => <button className="contest-card" key={contest.id} onClick={() => onOpenContest(contest.id)}><span className="contest-card__year">2026</span><div><p>{contest.field} · {contest.city}</p><h3>{contest.name}</h3><span>{contest.organizer}</span><small>{contest.description}</small></div><span className="contest-card__papers"><Icon name="file" size={16} />{contest.paperCount} annales</span><Icon name="chevron" size={20} /></button>)}</div>}
+    <footer className="data-footer directory-footer"><Icon name="info" size={16} /><span><strong>Référentiel de démonstration.</strong> Les calendriers, modalités et documents doivent être confirmés avec les organismes organisateurs.</span></footer>
+  </section>;
+}
+
+function ContestDetailPage({ contestId, onBack, onNotice }: { contestId: string | null; onBack: () => void; onNotice: (message: string) => void }) {
+  const [data, setData] = useState<ContestPapers | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!contestId) return;
+    setLoading(true); setError(null);
+    getContestPapers(contestId).then(setData).catch((requestError: Error) => setError(requestError.message)).finally(() => setLoading(false));
+  }, [contestId]);
+
+  if (loading) return <LoadingState label="Chargement des annales…" />;
+  if (error || !data) return <section className="error-card job-error"><Icon name="info" /><div><strong>Impossible de charger les annales.</strong><span>{error || 'Le concours est introuvable.'}</span></div><button onClick={onBack}>Retour aux concours</button></section>;
+  return <section className="contest-detail-page">
+    <button className="back-button" onClick={onBack}><Icon name="arrow-left" size={18} /> Retour aux concours</button>
+    <header className="contest-detail-hero"><div className="contest-detail-hero__icon"><Icon name="file" size={35} /></div><div><p className="eyebrow">{data.contest.field} · {data.contest.city}</p><h1>{data.contest.name}</h1><p>{data.contest.organizer} · {data.contest.series.join(' · ')}</p></div><span className="panel-tag panel-tag--gold">{data.papers.length} références</span></header>
+    <section className="annals-intro"><Icon name="info" size={19} /><p><strong>Références d'annales de démonstration.</strong> Les aperçus et téléchargements seront activés après vérification des droits de diffusion et ajout des fichiers sources.</p></section>
+    <section className="annals-list"><div className="annals-list__header"><p className="eyebrow">Épreuves disponibles</p><span>Format indicatif</span></div>{data.papers.map((paper) => <article className="paper-row" key={paper.id}><span className="paper-row__file"><Icon name="file" size={21} /></span><div className="paper-row__content"><strong>{paper.label}</strong><span>{paper.year} · {paper.type} · {paper.pages} pages</span></div><div className="paper-row__actions"><button onClick={() => onNotice(`L’aperçu de « ${paper.label} ${paper.year} » sera disponible après ajout du document source.`)}>Aperçu</button><button className="paper-download" onClick={() => onNotice(`Le téléchargement de « ${paper.label} ${paper.year} » n’est pas encore disponible.`)}>Télécharger</button></div></article>)}</section>
+    <footer className="data-footer directory-footer"><Icon name="info" size={16} /><span><strong>Avant publication :</strong> LogPose devra obtenir ou vérifier les droits de diffusion de chaque sujet et corrigé.</span></footer>
+  </section>;
+}
+
 export function App() {
   const [view, setView] = useState<View>('dashboard');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
@@ -209,6 +281,7 @@ export function App() {
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [jobLoading, setJobLoading] = useState(false);
   const [jobError, setJobError] = useState<string | null>(null);
+  const [selectedContestId, setSelectedContestId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const loadDashboard = () => {
@@ -231,8 +304,9 @@ export function App() {
     getJob(id).then((response) => setSelectedJob(response.item)).catch((requestError: Error) => setJobError(requestError.message)).finally(() => setJobLoading(false));
   };
   const showOfferNotice = () => setNotice('Les offres liées arriveront avec l’intégration des sources partenaires.');
+  const openContest = (id: string) => { setSelectedContestId(id); navigate('contest'); };
 
-  const title = view === 'dashboard' ? "Marché de l'emploi" : view === 'catalogue' ? 'Catalogue des métiers' : 'Fiche métier';
+  const title = view === 'dashboard' ? "Marché de l'emploi" : view === 'catalogue' ? 'Catalogue des métiers' : view === 'job' ? 'Fiche métier' : view === 'establishments' ? 'Établissements' : view === 'contests' ? 'Concours et annales' : 'Détail du concours';
   return <div className="app-shell">
     <aside className="sidebar">
       <button className="brand brand-button" onClick={() => navigate('dashboard')} aria-label="LogPose, accueil"><span className="brand-mark"><span /></span><span>log<span>pose</span></span></button>
@@ -240,18 +314,26 @@ export function App() {
         <button className={`side-nav__item ${view === 'dashboard' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('dashboard')}><Icon name="grid" /> <span>Marché de l'emploi</span></button>
         <button className={`side-nav__item ${view === 'catalogue' || view === 'job' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('catalogue')}><Icon name="layers" /> <span>Catalogue métiers</span></button>
         <span className="side-nav__item side-nav__item--soon"><Icon name="compass" /> <span>Orientation</span><em>Bientôt</em></span>
-        <span className="side-nav__item side-nav__item--soon"><Icon name="school" /> <span>Établissements</span></span>
-        <span className="side-nav__item side-nav__item--soon"><Icon name="file" /> <span>Annales</span></span>
+        <button className={`side-nav__item ${view === 'establishments' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('establishments')}><Icon name="school" /> <span>Établissements</span></button>
+        <button className={`side-nav__item ${view === 'contests' || view === 'contest' ? 'side-nav__item--active' : ''}`} onClick={() => navigate('contests')}><Icon name="file" /> <span>Annales</span></button>
       </nav>
-      <div className="sidebar__footer"><div className="sidebar__note"><Icon name="sparkle" size={17} /><span>Construire son avenir, un choix à la fois.</span></div><span className="version">MVP · Lots 1 & 2</span></div>
+      <div className="sidebar__footer"><div className="sidebar__note"><Icon name="sparkle" size={17} /><span>Construire son avenir, un choix à la fois.</span></div><span className="version">MVP · Lots 1 à 3</span></div>
     </aside>
     <main id="top" className="main-content">
       <header className="topbar"><div className="mobile-brand"><span className="brand-mark"><span /></span><strong>log<span>pose</span></strong></div><div className="topbar__context"><span className="status-dot" /> {title} · données de démonstration</div><button className="profile-button" aria-label="Profil utilisateur"><span>LP</span><Icon name="chevron" size={16} /></button></header>
       {view === 'dashboard' && <DashboardPage dashboard={dashboard} isLoading={dashboardLoading} error={dashboardError} filters={filters} options={options} limit={limit} onSetLimit={setLimit} onOpenFilters={() => setFilterOpen(true)} onClearFilters={() => setFilters(EMPTY_FILTERS)} onRetry={loadDashboard} onOpenJob={openJob} />}
       {view === 'catalogue' && <CataloguePage catalog={catalog} loading={catalogLoading} error={catalogError} onRetry={loadCatalog} onOpenJob={openJob} />}
       {view === 'job' && <JobPage job={selectedJob} loading={jobLoading} error={jobError} onBack={() => navigate('catalogue')} onOpenOffers={showOfferNotice} />}
+      {view === 'establishments' && <EstablishmentsPage onNotice={setNotice} />}
+      {view === 'contests' && <ContestsPage onOpenContest={openContest} />}
+      {view === 'contest' && <ContestDetailPage contestId={selectedContestId} onBack={() => navigate('contests')} onNotice={setNotice} />}
     </main>
-    <nav className="bottom-nav" aria-label="Navigation mobile"><button className={`bottom-nav__item ${view === 'dashboard' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('dashboard')}><Icon name="grid" /><span>Marché</span></button><button className={`bottom-nav__item ${view === 'catalogue' || view === 'job' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('catalogue')}><Icon name="layers" /><span>Métiers</span></button><span className="bottom-nav__item"><Icon name="school" /><span>Écoles</span></span><span className="bottom-nav__item"><Icon name="file" /><span>Annales</span></span></nav>
+    <nav className="bottom-nav" aria-label="Navigation mobile">
+      <button className={`bottom-nav__item ${view === 'dashboard' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('dashboard')}><Icon name="grid" /><span>Marché</span></button>
+      <button className={`bottom-nav__item ${view === 'catalogue' || view === 'job' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('catalogue')}><Icon name="layers" /><span>Métiers</span></button>
+      <button className={`bottom-nav__item ${view === 'establishments' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('establishments')}><Icon name="school" /><span>Écoles</span></button>
+      <button className={`bottom-nav__item ${view === 'contests' || view === 'contest' ? 'bottom-nav__item--active' : ''}`} onClick={() => navigate('contests')}><Icon name="file" /><span>Annales</span></button>
+    </nav>
     {isFilterOpen && options && <FilterPanel options={options} filters={filters} onClose={() => setFilterOpen(false)} onApply={applyFilters} onReset={() => setFilters(EMPTY_FILTERS)} />}
     {notice && <div className="demo-toast" role="status"><Icon name="info" size={17} /><span>{notice}</span><button onClick={() => setNotice(null)} aria-label="Fermer"><Icon name="close" size={15} /></button></div>}
   </div>;

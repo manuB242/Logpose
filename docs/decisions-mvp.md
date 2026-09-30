@@ -28,3 +28,16 @@ Le catalogue est livré avec une catégorie dépliable à la fois, une recherche
 - `GET /api/metiers/:id` : contenu complet d'une fiche métier.
 
 Les compétences, formations et organisations affichées sont des exemples de démonstration. Ils doivent être validés et sourcés avant toute diffusion publique. Les données de tendance et de volume restent dans le tableau de bord : elles ne sont pas affichées dans la fiche métier, conformément au cahier des charges.
+
+## Lot 3 — établissements, concours et annales
+
+Les établissements retournent des **parcours de formation**, et non des informations institutionnelles complètes : une fiche établissement, les frais, les contacts et les conditions d’admission restent à cadrer.
+
+- `GET /api/etablissements/options` : valeurs des filtres ;
+- `GET /api/etablissements?series=&fields=&jobs=` : parcours filtrés ;
+- `GET /api/concours/options` : valeurs des filtres ;
+- `GET /api/concours?series=&fields=` : liste filtrée des concours ;
+- `GET /api/concours/:id/annales` : références d’épreuves ;
+- `GET /api/annales/:id/telechargement` : retourne volontairement un statut d’indisponibilité tant que le fichier et son droit de diffusion ne sont pas validés.
+
+Aucun PDF d’annale n’est servi dans ce MVP. Cette décision évite de présenter comme téléchargeables des contenus dont LogPose n’a pas encore vérifié la provenance, l’intégrité et l’autorisation de diffusion.

@@ -10,6 +10,8 @@ Les deux premières itérations couvrent les **lots 1 et 2** du cahier des charg
 - filtres par zone, secteur, entreprise et type d'emploi ;
 - catalogue de métiers avec recherche, catégories et fiches détaillées ;
 - formations, compétences et organisations associées à chaque métier ;
+- recherche d'établissements par série, filière et métier visé ;
+- concours filtrables et références d'annales avec garde-fous sur les droits de diffusion ;
 - API REST locale avec données de démonstration clairement identifiées ;
 - interface responsive pensée d'abord pour les usages mobiles.
 
@@ -48,8 +50,8 @@ Le navigateur appelle uniquement des URL relatives sous `/api`. En développemen
 ## Suite prévue
 
 1. Valider les sources de données, leur date de mise à jour et leur méthode de calcul.
-2. Ajouter le catalogue de métiers et les fiches métiers.
-3. Intégrer établissements, concours et annales.
+2. Remplacer les référentiels de démonstration par des données contrôlées avec les partenaires.
+3. Ajouter les fiches établissement, conditions d’admission et fichiers d’annales autorisés.
 4. Mettre en place l'orientation guidée à partir de règles de compatibilité explicites, avant toute couche conversationnelle IA.
 
 Les documents initiaux du projet sont conservés à la racine du dépôt.
